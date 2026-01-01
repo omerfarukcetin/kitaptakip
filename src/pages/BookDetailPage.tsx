@@ -11,7 +11,7 @@ import { InteractiveReadingPlan } from '../components/calendar/InteractiveReadin
 import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
 import { formatDate, parseISODate } from '../utils/dateUtils';
-import { generateReadingDays } from '../utils/planUtils';
+import { generateReadingDays, getTodayTargetPage, recalculateEndDate } from '../utils/planUtils';
 import type { ReadingDay } from '../utils/planUtils';
 import type { BookUpdate } from '../lib/database.types';
 
@@ -82,6 +82,21 @@ export const BookDetailPage: React.FC = () => {
                     durationSeconds: duration,
                     endPage: newPage
                 });
+
+                // AKILLI PLAN GÜNCELLEME: Bitiş tarihini öne çek
+                if (plan) {
+                    const newEndDate = recalculateEndDate(newPage, book!.total_pages, plan.daily_pages);
+                    if (newEndDate !== plan.end_date) {
+                        await savePlan.mutateAsync({
+                            book_id: book!.id,
+                            start_date: plan.start_date,
+                            end_date: newEndDate,
+                            daily_pages: plan.daily_pages,
+                            calculation_mode: plan.calculation_mode,
+                            starting_page: plan.starting_page
+                        });
+                    }
+                }
             }
         }
         setSeconds(0);
@@ -471,6 +486,20 @@ export const BookDetailPage: React.FC = () => {
                         <div className="space-y-4">
                             <h2 className="text-2xl sm:text-3xl font-black opacity-80">{book.title}</h2>
                             <p className="text-lg font-bold opacity-60">Şu an harika bir maceradasın...</p>
+                            {plan && (
+                                <div className="mt-4 p-4 bg-white/10 rounded-2xl inline-block border border-white/10">
+                                    <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider opacity-90">
+                                        <Zap size={16} className="text-yellow-400" />
+                                        <span>Bugünkü Hedef: {plan.daily_pages} Sayfa</span>
+                                    </div>
+                                    <div className="text-xs opacity-60 mt-1 font-bold">
+                                        {book.current_page >= (getTodayTargetPage(plan, book.total_pages) || 0)
+                                            ? "Tebrikler! Bugünkü hedefini tamamladın. 🚀"
+                                            : `Hedefe ${(getTodayTargetPage(plan, book.total_pages) || 0) - book.current_page} sayfa kaldı.`
+                                        }
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="relative inline-block">

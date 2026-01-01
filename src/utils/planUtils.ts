@@ -53,3 +53,16 @@ export function getTodayTargetPage(
     const todayPlan = readingDays.find(day => day.date === todayStr);
     return todayPlan ? todayPlan.endPage : null;
 }
+
+export function recalculateEndDate(
+    current_page: number,
+    total_pages: number,
+    daily_pages: number
+): string {
+    const remainingPages = total_pages - current_page;
+    if (remainingPages <= 0) return formatDate(new Date());
+
+    const remainingDays = Math.ceil(remainingPages / daily_pages);
+    // Start from tomorrow since today's reading is already accounted for in current_page
+    return formatDate(addDays(new Date(), remainingDays));
+}
