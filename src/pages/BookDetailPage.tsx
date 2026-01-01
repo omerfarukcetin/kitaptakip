@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/shared/Layout';
 import { useBook, useBooks } from '../hooks/useBooks';
-import { useReadingPlan } from '../hooks/useReadingPlan';
+import { useReadingPlan, useReadingProgress } from '../hooks/useReadingPlan';
 import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff } from 'lucide-react';
 import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
@@ -21,6 +21,7 @@ export const BookDetailPage: React.FC = () => {
     const { book, isLoading } = useBook(id!);
     const { updateBook, deleteBook } = useBooks();
     const { plan, savePlan } = useReadingPlan(id!);
+    const { toggleProgress } = useReadingProgress(id!);
     const [showReadingPlan, setShowReadingPlan] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -65,11 +66,22 @@ export const BookDetailPage: React.FC = () => {
 
     const handleStopTimer = async () => {
         setTimerActive(false);
+        const duration = seconds;
         const newPageStr = prompt(`Okuma bitti! Şu an kaçıncı sayfadasınız? (Mevcut: ${book!.current_page})`, book!.current_page.toString());
+
         if (newPageStr !== null) {
             const newPage = parseInt(newPageStr);
             if (!isNaN(newPage) && newPage >= book!.current_page) {
-                await handlePageUpdate(newPage);
+                const pagesRead = newPage - book!.current_page;
+                const today = new Date().toISOString().split('T')[0];
+
+                // Kaydı reading_progress tablosuna ekle
+                await toggleProgress.mutateAsync({
+                    date: today,
+                    pagesRead: pagesRead,
+                    endPage: newPage,
+                    durationSeconds: duration
+                });
             }
         }
         setSeconds(0);

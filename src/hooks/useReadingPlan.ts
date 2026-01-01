@@ -109,11 +109,13 @@ export const useReadingProgress = (bookId: string) => {
         mutationFn: async ({
             date,
             pagesRead,
-            endPage
+            endPage,
+            durationSeconds
         }: {
             date: string;
             pagesRead: number;
             endPage?: number;
+            durationSeconds?: number;
         }) => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
@@ -166,6 +168,7 @@ export const useReadingProgress = (bookId: string) => {
                         book_id: bookId,
                         date,
                         pages_read: pagesRead,
+                        duration_seconds: durationSeconds || null,
                     }])
                     .select()
                     .single();

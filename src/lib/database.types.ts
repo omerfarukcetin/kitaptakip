@@ -178,6 +178,7 @@ export type Database = {
                     book_id: string;
                     date: string;
                     pages_read: number;
+                    duration_seconds: number | null;
                     notes: string | null;
                     created_at: string;
                 };
@@ -187,6 +188,7 @@ export type Database = {
                     book_id: string;
                     date: string;
                     pages_read: number;
+                    duration_seconds?: number | null;
                     notes?: string | null;
                     created_at?: string;
                 };
@@ -196,6 +198,7 @@ export type Database = {
                     book_id?: string;
                     date?: string;
                     pages_read?: number;
+                    duration_seconds?: number | null;
                     notes?: string | null;
                     created_at?: string;
                 };

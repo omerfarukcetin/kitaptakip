@@ -70,7 +70,7 @@ export const StatsPage: React.FC = () => {
                 </div>
 
                 {/* Overview Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                     <StatCard
                         title="Toplam Kitap"
                         value={speedMetrics?.totalBooks || 0}
@@ -98,6 +98,13 @@ export const StatsPage: React.FC = () => {
                         unit="Gün/Kitap"
                         icon={<Timer className="text-rose-600" />}
                         gradient="from-rose-500/10 to-pink-500/10"
+                    />
+                    <StatCard
+                        title="Okuma Hızı"
+                        value={speedMetrics?.avgSpeedPPM || 0}
+                        unit="Sayfa/Dak"
+                        icon={<Zap className="text-indigo-600" />}
+                        gradient="from-indigo-500/10 to-blue-500/10"
                     />
                 </div>
 

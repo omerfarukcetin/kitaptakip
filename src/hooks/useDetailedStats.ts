@@ -107,11 +107,17 @@ export const useDetailedStats = (year: number) => {
         });
 
         const totalPagesInYear = progress?.reduce((sum, p) => sum + p.pages_read, 0) || 0;
+        const totalDurationSeconds = progress?.reduce((sum, p) => sum + (p.duration_seconds || 0), 0) || 0;
         const uniqueDaysWithProgress = new Set(progress?.map(p => p.date)).size || 1;
+
+        // Calculate PPM (Pages Per Minute)
+        const totalMinutes = totalDurationSeconds / 60;
+        const avgSpeedPPM = totalMinutes > 0 ? (totalPagesInYear / totalMinutes).toFixed(2) : '0';
 
         return {
             avgDaysToFinish: booksWithDates > 0 ? Math.round(totalDays / booksWithDates) : 0,
             avgPagesPerDay: Math.round(totalPagesInYear / uniqueDaysWithProgress),
+            avgSpeedPPM,
             fastestBook: fastestBook.days === Infinity ? null : fastestBook,
             slowestBook: slowestBook.days === -Infinity ? null : slowestBook,
             totalBooks: completedBooks.length,
