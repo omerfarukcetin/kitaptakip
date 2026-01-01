@@ -98,7 +98,7 @@ export const BookDetailPage: React.FC = () => {
 
     return (
         <Layout>
-            <div className="max-w-7xl mx-auto space-y-6 pb-20">
+            <div className="max-w-7xl mx-auto space-y-6 pb-20 md:pb-8">
                 {/* Back Button */}
                 <Link
                     to="/library"
@@ -109,11 +109,11 @@ export const BookDetailPage: React.FC = () => {
                 </Link>
 
                 {/* Two Column Layout */}
-                <div className="grid md:grid-cols-[400px_1fr] gap-6">
+                <div className="grid md:grid-cols-[350px_1fr] gap-6">
                     {/* LEFT COLUMN - Book Info */}
                     <div className="space-y-6">
                         {/* Book Card */}
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                             {/* Cover */}
                             {book.cover_url ? (
                                 <img
@@ -133,11 +133,11 @@ export const BookDetailPage: React.FC = () => {
                             </div>
 
                             {/* Title & Author */}
-                            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">
+                            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2 break-words">
                                 {book.title}
                             </h1>
                             {book.author && (
-                                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-2">{book.author}</p>
+                                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-2 break-words">{book.author}</p>
                             )}
 
                             {book.rating !== null && book.rating > 0 && (
@@ -272,7 +272,7 @@ export const BookDetailPage: React.FC = () => {
                         {plan ? (
                             <>
                                 {/* Reading Plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6">
+                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
                                             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">Okuma Takvimim</h2>
@@ -296,7 +296,7 @@ export const BookDetailPage: React.FC = () => {
                                 </div>
 
                                 {/* Notes below reading plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6">
+                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                                     <BookNotes
                                         bookId={book.id}
                                         bookTitle={book.title}
@@ -322,7 +322,7 @@ export const BookDetailPage: React.FC = () => {
                                 </div>
 
                                 {/* Notes when no plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6">
+                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                                     <BookNotes
                                         bookId={book.id}
                                         bookTitle={book.title}
@@ -391,7 +391,7 @@ const InfoItem: React.FC<{ label: string; value: string | number }> = ({
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 {label}
             </p>
-            <p className="text-sm font-black text-slate-900 dark:text-slate-100">{value}</p>
+            <p className="text-sm font-black text-slate-900 dark:text-slate-100 break-all">{value}</p>
         </div>
     );
 };
