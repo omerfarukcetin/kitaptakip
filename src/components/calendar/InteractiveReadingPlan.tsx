@@ -39,7 +39,7 @@ export const InteractiveReadingPlan: React.FC<InteractiveReadingPlanProps> = ({
                     <button
                         key={day.dayNumber}
                         onClick={() => handleToggle(day)}
-                        className={`relative p-4 rounded-xl border-2 transition-all text-left ${completed
+                        className={`relative p-3 sm:p-4 rounded-xl border-2 transition-all text-left ${completed
                             ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 hover:bg-green-100 dark:hover:bg-green-900/30'
                             : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
                             }`}

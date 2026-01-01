@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </header>
 
             {/* Main Content */}
-            <main className="container mx-auto px-4 py-8">{children}</main>
+            <main className="container mx-auto px-4 py-8 overflow-x-hidden">{children}</main>
 
             {/* Mobile Navigation */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-40 pb-safe">

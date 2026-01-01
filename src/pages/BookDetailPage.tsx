@@ -98,7 +98,7 @@ export const BookDetailPage: React.FC = () => {
 
     return (
         <Layout>
-            <div className="max-w-7xl mx-auto space-y-6 pb-20 md:pb-8">
+            <div className="max-w-7xl mx-auto space-y-6 pb-20 md:pb-8 overflow-x-hidden">
                 {/* Back Button */}
                 <Link
                     to="/library"
@@ -108,10 +108,9 @@ export const BookDetailPage: React.FC = () => {
                     Kütüphaneye Dön
                 </Link>
 
-                {/* Two Column Layout */}
-                <div className="grid md:grid-cols-[350px_1fr] gap-6">
+                <div className="grid md:grid-cols-[350px_1fr] gap-6 min-w-0">
                     {/* LEFT COLUMN - Book Info */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 min-w-0 overflow-hidden md:overflow-visible">
                         {/* Book Card */}
                         <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                             {/* Cover */}
@@ -268,7 +267,7 @@ export const BookDetailPage: React.FC = () => {
                     </div>
 
                     {/* RIGHT COLUMN - Reading Plan */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 min-w-0 overflow-hidden md:overflow-visible">
                         {plan ? (
                             <>
                                 {/* Reading Plan */}
