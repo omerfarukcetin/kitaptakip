@@ -123,6 +123,7 @@ export const useDetailedStats = (year: number) => {
         categoryData,
         monthlyData,
         speedMetrics,
+        progressData: progress || [],
         isLoading: booksLoading || progressLoading
     };
 };

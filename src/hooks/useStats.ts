@@ -71,11 +71,51 @@ export const useStats = (year: number, month?: number) => {
         },
     });
 
+    const totalPagesAllTime = progress?.reduce((sum, p) => sum + p.pages_read, 0) || 0;
+
+    const streak = (() => {
+        if (!progress || progress.length === 0) return 0;
+
+        const dates = new Set(progress.map(p => p.date));
+        let count = 0;
+        let current = new Date();
+
+        // Check if read today
+        const todayStr = current.toISOString().split('T')[0];
+        if (!dates.has(todayStr)) {
+            // If not read today, start checking from yesterday
+            current.setDate(current.getDate() - 1);
+        }
+
+        while (true) {
+            const dateStr = current.toISOString().split('T')[0];
+            if (dates.has(dateStr)) {
+                count++;
+                current.setDate(current.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return count;
+    })();
+
+    const levelInfo = (() => {
+        const pages = totalPagesAllTime;
+        if (pages < 500) return { level: 1, label: 'Çırak Okur', nextAt: 500 };
+        if (pages < 1500) return { level: 2, label: 'Kitap Dostu', nextAt: 1500 };
+        if (pages < 3000) return { level: 3, label: 'Kitap Kurdu', nextAt: 3000 };
+        if (pages < 6000) return { level: 4, label: 'Bilge Okur', nextAt: 6000 };
+        return { level: 5, label: 'Filozof', nextAt: Infinity };
+    })();
+
     const yearlyStats = {
         completedBooks: books?.length || 0,
         totalPagesRead: progress?.reduce((sum, p) => sum + p.pages_read, 0) || 0,
         totalNotes: notes?.length || 0,
         books,
+        streak,
+        levelInfo,
+        totalPagesAllTime
     };
 
     return {

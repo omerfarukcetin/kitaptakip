@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/shared/Layout';
 import { useDetailedStats } from '../hooks/useDetailedStats';
+import { ReadingJournal } from '../components/stats/ReadingJournal';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend
@@ -23,7 +24,7 @@ const COLORS = [
 
 export const StatsPage: React.FC = () => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const { categoryData, monthlyData, speedMetrics, isLoading } = useDetailedStats(selectedYear);
+    const { categoryData, monthlyData, speedMetrics, progressData, isLoading } = useDetailedStats(selectedYear);
     const [chartType, setChartType] = useState<'pages' | 'books'>('pages');
 
     if (isLoading) {
@@ -210,6 +211,9 @@ export const StatsPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Activity Journal */}
+                <ReadingJournal progressData={progressData} year={selectedYear} />
 
                 {/* Speed Analysis Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

@@ -14,6 +14,8 @@ import {
     ChevronRight,
     Edit2,
     Check,
+    Zap,
+    Award,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useReadingGoals } from '../hooks/useReadingGoals';
@@ -162,6 +164,46 @@ export const DashboardPage: React.FC = () => {
                         />
                     </Link>
                 </div>
+
+                {/* Gamification Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-2xl">
+                                <Zap className="text-orange-600 animate-pulse" size={32} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Okuma Serisi</p>
+                                <p className="text-3xl font-black text-slate-900 dark:text-slate-100">{yearlyStats.streak} Gün</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">İstikrar</p>
+                            <p className="text-sm font-bold text-orange-600">Harika gidiyorsun! 🔥</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl">
+                                <Award className="text-indigo-600" size={32} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Okuyucu Seviyesi</p>
+                                <p className="text-xl font-black text-slate-900 dark:text-slate-100">{yearlyStats.levelInfo.label}</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">Sonraki Seviye</p>
+                            <p className="text-sm font-bold text-indigo-600">
+                                {yearlyStats.levelInfo.nextAt === Infinity
+                                    ? 'Max Level'
+                                    : `${yearlyStats.levelInfo.nextAt - (yearlyStats.totalPagesAllTime || 0)} sayfa kaldı`}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
 
                 {showMonthlySummary && showSummary && (
                     <MonthlySummaryCard
