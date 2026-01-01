@@ -25,6 +25,7 @@ import { useAllReadingPlans } from '../hooks/useReadingPlan';
 import { getTodayTargetPage } from '../utils/planUtils';
 import { RandomNoteWidget } from '../components/dashboard/RandomNoteWidget';
 import { SmartReminders } from '../components/dashboard/SmartReminders';
+import { BookRecommendations } from '../components/dashboard/BookRecommendations';
 import type { BookInsert } from '../lib/database.types';
 
 export const DashboardPage: React.FC = () => {
@@ -301,6 +302,8 @@ export const DashboardPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                <BookRecommendations />
 
                 {/* Recent Books */}
                 <div>

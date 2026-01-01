@@ -48,3 +48,40 @@ TALİMATLAR:
     const response = await result.response;
     return response.text();
 };
+
+export const getBookRecommendations = async (books: { title: string; author: string | null; categories: string[] | null }[]) => {
+    if (!API_KEY) {
+        throw new Error("API Anahtarı bulunamadı.");
+    }
+
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: { responseMimeType: "application/json" }
+    });
+
+    const prompt = `
+Kullanıcının okuduğu veya kütüphanesine eklediği kitapların listesi aşağıdadır:
+${books.map(b => `- ${b.title}${b.author ? ` (${b.author})` : ''} [Kategoriler: ${b.categories?.join(', ') || 'Yok'}]`).join('\n')}
+
+Bu listeye dayanarak kullanıcıya 3 yeni kitap önerisinde bulun. 
+Önerilerin mümkün olduğunca kullanıcının zevkine uygun, benzer temalarda veya türlerde olsun.
+
+Yanıtını şu JSON formatında ver:
+{
+  "recommendations": [
+    {
+      "title": "Kitap Adı",
+      "author": "Yazar Adı",
+      "reason": "Neden önerildiğine dair kısa, etkileyici bir açıklama (Maksimum 150 karakter)",
+      "category": "Kitabın türü"
+    }
+  ]
+}
+`.trim();
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return JSON.parse(response.text());
+};
+
