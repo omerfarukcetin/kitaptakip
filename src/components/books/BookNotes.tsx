@@ -440,7 +440,7 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                                             {note.note_type === 'quote' && (
                                                 <Quote size={24} className="absolute -left-1 sm:-left-2 -top-1 sm:-top-2 text-indigo-200 dark:text-indigo-800 opacity-50" />
                                             )}
-                                            <div className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium pl-6 sm:pl-8 mb-4 sm:mb-5 whitespace-pre-line">
+                                            <div className="text-slate-700 dark:text-slate-300 text-sm sm:text-lg leading-relaxed font-medium pl-6 sm:pl-8 mb-4 sm:mb-5 whitespace-pre-line">
                                                 <NoteLink content={note.content} />
                                             </div>
                                         </div>

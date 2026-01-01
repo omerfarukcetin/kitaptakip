@@ -179,7 +179,7 @@ export const BookDetailPage: React.FC = () => {
                 {!isFocusMode && (
                     <Link
                         to="/library"
-                        className="inline-flex items-center gap-2 text-slate-600 hover:text-indigo-600 font-bold transition-colors mb-6 block"
+                        className="inline-flex items-center gap-2 text-slate-600 hover:text-indigo-600 font-bold transition-colors mb-2 block"
                     >
                         <ArrowLeft size={20} />
                         Kütüphaneye Dön
@@ -311,7 +311,7 @@ export const BookDetailPage: React.FC = () => {
                                             <MessageSquareQuote size={18} />
                                             <h3 className="font-black text-sm uppercase tracking-wider">Final İncelemesi</h3>
                                         </div>
-                                        <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                                        <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed text-sm sm:text-base">
                                             "{(book as any).review}"
                                         </p>
                                     </div>
