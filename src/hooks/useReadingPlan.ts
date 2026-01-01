@@ -193,6 +193,78 @@ export const useReadingProgress = (bookId: string) => {
         },
     });
 
+    // Record a timer session (append to existing progress for the day)
+    const recordSession = useMutation({
+        mutationFn: async ({
+            date,
+            pagesRead,
+            durationSeconds,
+            endPage
+        }: {
+            date: string;
+            pagesRead: number;
+            durationSeconds: number;
+            endPage: number;
+        }) => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Not authenticated');
+
+            const { data: existing } = await supabase
+                .from('reading_progress')
+                .select('*')
+                .eq('book_id', bookId)
+                .eq('date', date)
+                .maybeSingle();
+
+            if (existing) {
+                const { data, error } = await supabase
+                    .from('reading_progress')
+                    .update({
+                        pages_read: existing.pages_read + pagesRead,
+                        duration_seconds: (existing.duration_seconds || 0) + durationSeconds
+                    })
+                    .eq('id', existing.id)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                await supabase
+                    .from('books')
+                    .update({ current_page: endPage })
+                    .eq('id', bookId);
+
+                return data as ReadingProgress;
+            } else {
+                const { data, error } = await supabase
+                    .from('reading_progress')
+                    .insert([{
+                        user_id: user.id,
+                        book_id: bookId,
+                        date,
+                        pages_read: pagesRead,
+                        duration_seconds: durationSeconds
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                await supabase
+                    .from('books')
+                    .update({ current_page: endPage })
+                    .eq('id', bookId);
+
+                return data as ReadingProgress;
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['reading-progress', bookId] });
+            queryClient.invalidateQueries({ queryKey: ['books'] });
+            queryClient.invalidateQueries({ queryKey: ['book', bookId] });
+        },
+    });
+
     // Calculate total pages read
     const totalPagesRead = progressEntries?.reduce((sum, entry) => sum + entry.pages_read, 0) || 0;
 
@@ -200,6 +272,7 @@ export const useReadingProgress = (bookId: string) => {
         progressEntries,
         isLoading,
         toggleProgress,
+        recordSession,
         totalPagesRead,
     };
 };

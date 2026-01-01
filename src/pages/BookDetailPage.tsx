@@ -21,7 +21,7 @@ export const BookDetailPage: React.FC = () => {
     const { book, isLoading } = useBook(id!);
     const { updateBook, deleteBook } = useBooks();
     const { plan, savePlan } = useReadingPlan(id!);
-    const { toggleProgress } = useReadingProgress(id!);
+    const { recordSession } = useReadingProgress(id!);
     const [showReadingPlan, setShowReadingPlan] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -76,11 +76,11 @@ export const BookDetailPage: React.FC = () => {
                 const today = new Date().toISOString().split('T')[0];
 
                 // Kaydı reading_progress tablosuna ekle
-                await toggleProgress.mutateAsync({
+                await recordSession.mutateAsync({
                     date: today,
                     pagesRead: pagesRead,
-                    endPage: newPage,
-                    durationSeconds: duration
+                    durationSeconds: duration,
+                    endPage: newPage
                 });
             }
         }
