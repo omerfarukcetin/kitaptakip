@@ -25,6 +25,7 @@ export const BookDetailPage: React.FC = () => {
     const [showEditForm, setShowEditForm] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [timerActive, setTimerActive] = useState(false);
+    const [isTimerFullScreen, setIsTimerFullScreen] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -72,6 +73,7 @@ export const BookDetailPage: React.FC = () => {
             }
         }
         setSeconds(0);
+        setIsTimerFullScreen(false);
     };
 
     const handleEdit = async (bookData: BookUpdate) => {
@@ -286,7 +288,15 @@ export const BookDetailPage: React.FC = () => {
 
                                 <div className="flex gap-2 mb-4">
                                     <button
-                                        onClick={() => timerActive ? handleStopTimer() : setTimerActive(true)}
+                                        onClick={() => {
+                                            if (timerActive) {
+                                                handleStopTimer();
+                                            } else {
+                                                setTimerActive(true);
+                                                setIsFocusMode(true);
+                                                setIsTimerFullScreen(true);
+                                            }
+                                        }}
                                         className={`flex-1 px-4 py-3 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${timerActive
                                             ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
                                             : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
@@ -344,6 +354,15 @@ export const BookDetailPage: React.FC = () => {
                                     >
                                         <Eye size={24} />
                                     </button>
+                                    {!isTimerFullScreen && timerActive && (
+                                        <button
+                                            onClick={() => setIsTimerFullScreen(true)}
+                                            className="p-3 bg-white/20 hover:bg-white/30 rounded-2xl transition-all"
+                                            title="Zamanlayıcıyı Büyüt"
+                                        >
+                                            <Timer size={24} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -434,6 +453,44 @@ export const BookDetailPage: React.FC = () => {
                     />
                 )
             }
+            {isTimerFullScreen && timerActive && (
+                <div className="fixed inset-0 z-50 bg-indigo-600 flex flex-col items-center justify-center text-white p-8 animate-in fade-in duration-500">
+                    <div className="max-w-xl w-full text-center space-y-12">
+                        <div className="space-y-4">
+                            <h2 className="text-2xl sm:text-3xl font-black opacity-80">{book.title}</h2>
+                            <p className="text-lg font-bold opacity-60">Şu an harika bir maceradasın...</p>
+                        </div>
+
+                        <div className="relative inline-block">
+                            <div className="text-[100px] sm:text-[150px] font-black font-mono leading-none tracking-tighter">
+                                {formatTime(seconds)}
+                            </div>
+                            <div className="absolute -top-4 -right-8">
+                                <Zap className="text-yellow-400 animate-bounce" size={48} />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8">
+                            <button
+                                onClick={() => handleStopTimer()}
+                                className="w-full sm:w-auto px-12 py-5 bg-white text-indigo-600 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-105 transition-all"
+                            >
+                                Okumayı Bitir
+                            </button>
+                            <button
+                                onClick={() => setIsTimerFullScreen(false)}
+                                className="w-full sm:w-auto px-12 py-5 bg-white/10 hover:bg-white/20 text-white rounded-[2rem] font-black text-xl transition-all border border-white/20"
+                            >
+                                Notlara Dön
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="absolute bottom-12 left-0 right-0 text-center opacity-40 font-black tracking-widest uppercase text-xs">
+                        OkurNot • Odak Modu Etkin
+                    </div>
+                </div>
+            )}
         </Layout >
     );
 };
