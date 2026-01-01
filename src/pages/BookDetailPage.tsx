@@ -8,6 +8,7 @@ import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
 import { InteractiveReadingPlan } from '../components/calendar/InteractiveReadingPlan';
+import { SmartAnalysisCard } from '../components/books/SmartAnalysisCard';
 import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
 import { formatDate, parseISODate } from '../utils/dateUtils';
@@ -440,6 +441,14 @@ export const BookDetailPage: React.FC = () => {
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
+                                    </div>
+
+                                    <div className="mb-8">
+                                        <SmartAnalysisCard
+                                            bookId={book.id}
+                                            totalPages={book.total_pages}
+                                            currentPage={book.current_page}
+                                        />
                                     </div>
 
                                     <InteractiveReadingPlan

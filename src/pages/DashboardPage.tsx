@@ -24,6 +24,7 @@ import { MonthlySummaryCard } from '../components/dashboard/MonthlySummaryCard';
 import { useAllReadingPlans } from '../hooks/useReadingPlan';
 import { getTodayTargetPage } from '../utils/planUtils';
 import { RandomNoteWidget } from '../components/dashboard/RandomNoteWidget';
+import { SmartReminders } from '../components/dashboard/SmartReminders';
 import type { BookInsert } from '../lib/database.types';
 
 export const DashboardPage: React.FC = () => {
@@ -128,6 +129,8 @@ export const DashboardPage: React.FC = () => {
                         </button>
                     </div>
                 </div>
+
+                <SmartReminders />
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
