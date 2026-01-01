@@ -20,7 +20,7 @@ export const BookDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { book, isLoading } = useBook(id!);
     const { updateBook, deleteBook } = useBooks();
-    const { plan, savePlan } = useReadingPlan(id!);
+    const { plan, savePlan, deletePlan } = useReadingPlan(id!);
     const { recordSession } = useReadingProgress(id!);
     const [showReadingPlan, setShowReadingPlan] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -101,6 +101,17 @@ export const BookDetailPage: React.FC = () => {
         }
         setSeconds(0);
         setIsTimerFullScreen(false);
+    };
+
+    const handleDeletePlan = async () => {
+        if (window.confirm('Okuma planını silmek istediğinize emin misiniz?')) {
+            try {
+                await deletePlan.mutateAsync(id!);
+            } catch (error) {
+                console.error('Plan silinirken hata:', error);
+                alert('Plan silinirken bir hata oluştu');
+            }
+        }
     };
 
     const handleEdit = async (bookData: BookUpdate) => {
@@ -404,12 +415,21 @@ export const BookDetailPage: React.FC = () => {
                                                 Günlük {plan.daily_pages} sayfa • {formatDate(new Date(plan.start_date))} - {formatDate(new Date(plan.end_date))}
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={() => setShowReadingPlan(true)}
-                                            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
-                                        >
-                                            Yeni Plan
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setShowReadingPlan(true)}
+                                                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
+                                            >
+                                                Yeni Plan
+                                            </button>
+                                            <button
+                                                onClick={handleDeletePlan}
+                                                className="p-1.5 sm:p-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
+                                                title="Planı Sil"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <InteractiveReadingPlan
