@@ -44,18 +44,7 @@ export const SmartReminders: React.FC = () => {
             });
         }
 
-        // 3. Streak Reminder
-        if (yearlyStats.streak > 0) {
-            reminders.push({
-                icon: <Zap className="text-orange-500" size={18} />,
-                title: `${yearlyStats.streak} Günlük Seri!`,
-                message: "İstikrarın harika gidiyor. Bu seriyi bozmamak için bugün en az 5 sayfa okumayı unutma!",
-                color: "bg-orange-50 dark:bg-orange-900/10 border-orange-100",
-                textColor: "text-orange-700 dark:text-orange-400"
-            });
-        }
-
-        // 4. Target Ahead/Behind
+        // 3. Target Ahead/Behind
         if (readingBooks.length > 0) {
             reminders.push({
                 icon: <Target className="text-indigo-500" size={18} />,
