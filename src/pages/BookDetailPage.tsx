@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/shared/Layout';
 import { useBook, useBooks } from '../hooks/useBooks';
 import { useReadingPlan, useReadingProgress } from '../hooks/useReadingPlan';
-import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff, Play, Pause } from 'lucide-react';
+import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff, Play, Pause, ChevronDown, ChevronUp } from 'lucide-react';
 import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
@@ -28,6 +28,7 @@ export const BookDetailPage: React.FC = () => {
     const [timerActive, setTimerActive] = useState(false);
     const [isTimerFullScreen, setIsTimerFullScreen] = useState(false);
     const [seconds, setSeconds] = useState(0);
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -285,13 +286,22 @@ export const BookDetailPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* Description */}
                                 {book.description && (
                                     <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
-                                        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-2 text-sm">Kitap Hakkında</h3>
-                                        <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line">
-                                            {book.description}
-                                        </p>
+                                        <button
+                                            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                            className="flex items-center justify-between w-full text-slate-900 dark:text-slate-100 mb-2 group"
+                                        >
+                                            <h3 className="font-bold text-sm">Kitap Hakkında</h3>
+                                            <div className="text-slate-400 group-hover:text-indigo-600 transition-colors">
+                                                {isDescriptionExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                            </div>
+                                        </button>
+                                        {isDescriptionExpanded && (
+                                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line animate-in fade-in slide-in-from-top-2 duration-300">
+                                                {book.description}
+                                            </p>
+                                        )}
                                     </div>
                                 )}
 
