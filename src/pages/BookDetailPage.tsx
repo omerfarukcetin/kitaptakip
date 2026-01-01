@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/shared/Layout';
 import { useBook, useBooks } from '../hooks/useBooks';
 import { useReadingPlan, useReadingProgress } from '../hooks/useReadingPlan';
-import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff, Play, Pause } from 'lucide-react';
 import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
@@ -12,7 +12,7 @@ import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
 import { formatDate, parseISODate } from '../utils/dateUtils';
 import { generateReadingDays, getTodayTargetPage, recalculateEndDate } from '../utils/planUtils';
-import type { ReadingDay } from '../utils/planUtils';
+import type { ReadingDay } from '../lib/types';
 import type { BookUpdate } from '../lib/database.types';
 
 export const BookDetailPage: React.FC = () => {
@@ -381,7 +381,7 @@ export const BookDetailPage: React.FC = () => {
                                     >
                                         <Eye size={24} />
                                     </button>
-                                    {!isTimerFullScreen && timerActive && (
+                                    {!isTimerFullScreen && (
                                         <button
                                             onClick={() => setIsTimerFullScreen(true)}
                                             className="p-3 bg-white/20 hover:bg-white/30 rounded-2xl transition-all"
@@ -480,7 +480,7 @@ export const BookDetailPage: React.FC = () => {
                     />
                 )
             }
-            {isTimerFullScreen && timerActive && (
+            {isTimerFullScreen && (
                 <div className="fixed inset-0 z-50 bg-indigo-600 flex flex-col items-center justify-center text-white p-8 animate-in fade-in duration-500">
                     <div className="max-w-xl w-full text-center space-y-12">
                         <div className="space-y-4">
@@ -513,6 +513,25 @@ export const BookDetailPage: React.FC = () => {
 
                         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8">
                             <button
+                                onClick={() => setTimerActive(!timerActive)}
+                                className={`w-full sm:w-auto px-8 py-5 rounded-[2rem] font-black text-xl transition-all border-2 flex items-center justify-center gap-3 ${timerActive
+                                    ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
+                                    : 'bg-yellow-400 border-yellow-400 text-indigo-900 shadow-xl scale-105'
+                                    }`}
+                            >
+                                {timerActive ? (
+                                    <>
+                                        <Pause size={24} />
+                                        Duraklat
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play size={24} />
+                                        Devam Et
+                                    </>
+                                )}
+                            </button>
+                            <button
                                 onClick={() => handleStopTimer()}
                                 className="w-full sm:w-auto px-12 py-5 bg-white text-indigo-600 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-105 transition-all"
                             >
@@ -520,7 +539,7 @@ export const BookDetailPage: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => setIsTimerFullScreen(false)}
-                                className="w-full sm:w-auto px-12 py-5 bg-white/10 hover:bg-white/20 text-white rounded-[2rem] font-black text-xl transition-all border border-white/20"
+                                className="w-full sm:w-auto px-8 py-5 bg-white/10 hover:bg-white/20 text-white rounded-[2rem] font-black text-xl transition-all border border-white/20"
                             >
                                 Notlara Dön
                             </button>
