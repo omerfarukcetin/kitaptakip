@@ -83,19 +83,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <main className="container mx-auto px-4 py-8">{children}</main>
 
             {/* Mobile Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-40">
-                <div className="grid grid-cols-4 gap-1 p-2">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-40 pb-safe">
+                <div className="grid grid-cols-5 gap-1 p-1">
                     {navItems.map((item) => (
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`flex flex-col items-center gap-1 py-3 rounded-xl font-bold transition-all ${location.pathname === item.path
+                            className={`flex flex-col items-center gap-1 py-2 rounded-xl font-bold transition-all ${location.pathname === item.path
                                 ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
                                 : 'text-slate-600 dark:text-slate-400'
                                 }`}
                         >
-                            <item.icon size={22} />
-                            <span className="text-xs">{item.label}</span>
+                            <item.icon size={20} />
+                            <span className="text-[10px] text-center leading-tight">
+                                {item.label === 'İstatistikler' ? 'İstatistik' :
+                                    item.label === 'Tüm Notlar' ? 'Notlar' :
+                                        item.label}
+                            </span>
                         </Link>
                     ))}
                 </div>
