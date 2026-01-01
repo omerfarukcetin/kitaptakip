@@ -80,31 +80,31 @@ export const useDetailedStats = (year: number) => {
     })();
 
     const speedMetrics = (() => {
-        if (!completedBooks || completedBooks.length === 0) return null;
-
         let totalDays = 0;
         let booksWithDates = 0;
         let fastestBook = { title: '', days: Infinity };
         let slowestBook = { title: '', days: -Infinity };
 
-        completedBooks.forEach(book => {
-            if (book.started_at && book.completed_at) {
-                const start = new Date(book.started_at);
-                const end = new Date(book.completed_at);
-                const diffTime = Math.abs(end.getTime() - start.getTime());
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1; // At least 1 day
+        if (completedBooks && completedBooks.length > 0) {
+            completedBooks.forEach(book => {
+                if (book.started_at && book.completed_at) {
+                    const start = new Date(book.started_at);
+                    const end = new Date(book.completed_at);
+                    const diffTime = Math.abs(end.getTime() - start.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
-                totalDays += diffDays;
-                booksWithDates++;
+                    totalDays += diffDays;
+                    booksWithDates++;
 
-                if (diffDays < fastestBook.days) {
-                    fastestBook = { title: book.title, days: diffDays };
+                    if (diffDays < fastestBook.days) {
+                        fastestBook = { title: book.title, days: diffDays };
+                    }
+                    if (diffDays > slowestBook.days) {
+                        slowestBook = { title: book.title, days: diffDays };
+                    }
                 }
-                if (diffDays > slowestBook.days) {
-                    slowestBook = { title: book.title, days: diffDays };
-                }
-            }
-        });
+            });
+        }
 
         const totalPagesInYear = progress?.reduce((sum, p) => sum + p.pages_read, 0) || 0;
         const totalDurationSeconds = progress?.reduce((sum, p) => sum + (p.duration_seconds || 0), 0) || 0;
@@ -120,7 +120,7 @@ export const useDetailedStats = (year: number) => {
             avgSpeedPPM,
             fastestBook: fastestBook.days === Infinity ? null : fastestBook,
             slowestBook: slowestBook.days === -Infinity ? null : slowestBook,
-            totalBooks: completedBooks.length,
+            totalBooks: completedBooks?.length || 0,
             totalPages: totalPagesInYear
         };
     })();
