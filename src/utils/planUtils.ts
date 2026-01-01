@@ -1,13 +1,7 @@
-import { addDays, formatDate } from './dateUtils';
+import { addDays, formatDate, formatISODate } from './dateUtils';
 import { parseISODate } from './dateUtils';
 
-export interface ReadingDay {
-    dayNumber: number;
-    date: string;
-    startPage: number;
-    endPage: number;
-    dailyPages: number;
-}
+import { ReadingDay } from '../lib/types';
 
 export function generateReadingDays(
     plan: { start_date: string; daily_pages: number; starting_page?: number },
@@ -31,7 +25,8 @@ export function generateReadingDays(
 
         days.push({
             dayNumber: i + 1,
-            date: formatDate(addDays(startDate, i)),
+            date: formatISODate(addDays(startDate, i)),
+            displayDate: formatDate(addDays(startDate, i)),
             startPage: pageNum,
             endPage: endPage,
             dailyPages: dailyTarget,
@@ -48,7 +43,7 @@ export function getTodayTargetPage(
     totalPages: number
 ): number | null {
     const readingDays = generateReadingDays(plan, totalPages);
-    const todayStr = formatDate(new Date());
+    const todayStr = formatISODate(new Date());
 
     const todayPlan = readingDays.find(day => day.date === todayStr);
     return todayPlan ? todayPlan.endPage : null;
@@ -64,5 +59,7 @@ export function recalculateEndDate(
 
     const remainingDays = Math.ceil(remainingPages / daily_pages);
     // Start from tomorrow since today's reading is already accounted for in current_page
-    return formatDate(addDays(new Date(), remainingDays));
+    // But if we read everything today, end date is today
+    if (remainingDays === 0) return formatISODate(new Date());
+    return formatISODate(addDays(new Date(), remainingDays));
 }

@@ -1,7 +1,8 @@
 
 export interface ReadingDay {
   dayNumber: number;
-  date: string;
+  date: string; // ISO format
+  displayDate: string; // Localized format
   startPage: number;
   endPage: number;
   dailyPages: number;

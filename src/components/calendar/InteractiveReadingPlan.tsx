@@ -17,14 +17,12 @@ export const InteractiveReadingPlan: React.FC<InteractiveReadingPlanProps> = ({
     const { progressEntries, toggleProgress } = useReadingProgress(bookId);
 
     const isDateCompleted = (dateStr: string) => {
-        const date = parseDateString(dateStr, startDate);
-        return progressEntries?.some(entry => entry.date === date);
+        return progressEntries?.some(entry => entry.date === dateStr);
     };
 
     const handleToggle = async (day: ReadingDay) => {
-        const date = parseDateString(day.date, startDate);
         await toggleProgress.mutateAsync({
-            date,
+            date: day.date,
             pagesRead: day.dailyPages,
             endPage: day.endPage, // AUTO UPDATE: Pass endPage to update current_page
         });
@@ -65,7 +63,7 @@ export const InteractiveReadingPlan: React.FC<InteractiveReadingPlanProps> = ({
 
                         {/* Date */}
                         <p className={`text-sm font-bold mb-2 ${completed ? 'text-green-700 dark:text-green-400 line-through' : 'text-slate-900 dark:text-slate-100'}`}>
-                            {day.date
+                            {day.displayDate
                                 .replace(' Pazartesi', ' Pzt')
                                 .replace(' Salı', ' Sal')
                                 .replace(' Çarşamba', ' Çar')
@@ -91,20 +89,4 @@ export const InteractiveReadingPlan: React.FC<InteractiveReadingPlanProps> = ({
     );
 };
 
-// Helper function to parse display date and convert to YYYY-MM-DD
-function parseDateString(displayDate: string, startDateStr: string): string {
-    const monthMap: { [key: string]: number } = {
-        'Ocak': 0, 'Şubat': 1, 'Mart': 2, 'Nisan': 3,
-        'Mayıs': 4, 'Haziran': 5, 'Temmuz': 6, 'Ağustos': 7,
-        'Eylül': 8, 'Ekim': 9, 'Kasım': 10, 'Aralık': 11
-    };
 
-    const parts = displayDate.split(' ');
-    const day = parseInt(parts[0]);
-    const month = monthMap[parts[1]];
-
-    const startYear = new Date(startDateStr).getFullYear();
-    const date = new Date(startYear, month, day);
-
-    return date.toISOString().split('T')[0];
-}
