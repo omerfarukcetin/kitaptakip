@@ -50,16 +50,16 @@ export const LibraryPage: React.FC = () => {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-2">Kütüphanem</h1>
-                        <p className="text-slate-600 dark:text-slate-400">
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">Kütüphanem</h1>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
                             {books?.length || 0} kitap toplam
                         </p>
                     </div>
                     <button
                         onClick={() => setShowBookForm(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                        className="flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
                     >
-                        <Plus size={20} />
+                        <Plus size={18} />
                         Yeni Kitap
                     </button>
                 </div>
@@ -69,17 +69,17 @@ export const LibraryPage: React.FC = () => {
                     <div className="flex-1 relative">
                         <Search
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                            size={20}
+                            size={18}
                         />
                         <input
                             type="text"
                             placeholder="Kitap veya yazar ara..."
-                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                            className="w-full pl-10 pr-4 py-2.5 sm:pl-12 sm:py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm sm:text-base"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+                    <div className="grid grid-cols-2 xs:grid-cols-4 sm:flex gap-2">
                         <FilterButton
                             active={statusFilter === 'all'}
                             onClick={() => setStatusFilter('all')}
@@ -160,8 +160,8 @@ export const LibraryPage: React.FC = () => {
                                                     const isAhead = book.current_page >= targetPage;
                                                     return (
                                                         <p className={`text-[10px] font-black px-1.5 py-0.5 rounded ${isAhead
-                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                                : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                            : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
                                                             }`}>
                                                             Hedef: {targetPage}
                                                         </p>
@@ -236,14 +236,14 @@ const FilterButton: React.FC<FilterButtonProps> = ({
     return (
         <button
             onClick={onClick}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${active
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all ${active
                 ? color
                     ? `${activeColors[color]} text-white shadow-lg`
                     : 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg'
                 : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
         >
-            {icon}
+            {icon && React.cloneElement(icon as React.ReactElement, { size: 14 })}
             {label}
         </button>
     );

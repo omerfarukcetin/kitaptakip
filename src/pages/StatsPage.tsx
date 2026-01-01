@@ -45,25 +45,25 @@ export const StatsPage: React.FC = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-2">Okuma Analizi</h1>
-                        <p className="text-slate-600 dark:text-slate-400 font-medium">Okuma yolculuğunuzun detaylı dökümü</p>
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">Okuma Analizi</h1>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">Okuma yolculuğunuzun detaylı dökümü</p>
                     </div>
 
-                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-1.5 sm:p-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                         <button
                             onClick={() => setSelectedYear(selectedYear - 1)}
-                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all"
+                            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all"
                         >
-                            <ChevronLeft size={20} className="text-slate-600 dark:text-slate-400" />
+                            <ChevronLeft size={18} className="text-slate-600 dark:text-slate-400" />
                         </button>
-                        <span className="text-xl font-black text-slate-900 dark:text-slate-100 w-16 text-center">
+                        <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 w-12 sm:w-16 text-center">
                             {selectedYear}
                         </span>
                         <button
                             onClick={() => setSelectedYear(selectedYear + 1)}
-                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all"
+                            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all"
                         >
-                            <ChevronRight size={20} className="text-slate-600 dark:text-slate-400" />
+                            <ChevronRight size={18} className="text-slate-600 dark:text-slate-400" />
                         </button>
                     </div>
                 </div>
@@ -103,13 +103,13 @@ export const StatsPage: React.FC = () => {
                 {/* Main Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Monthly Trend */}
-                    <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative group">
+                    <div className="bg-white dark:bg-slate-800 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors" />
 
-                        <div className="flex items-center justify-between mb-8 relative">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Aylık Değişim</h3>
-                                <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">Gelişim Grafiği</p>
+                                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">Aylık Değişim</h3>
+                                <p className="text-[10px] sm:text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">Gelişim Grafiği</p>
                             </div>
                             <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
                                 <button
@@ -161,15 +161,15 @@ export const StatsPage: React.FC = () => {
                     </div>
 
                     {/* Genre Distribution */}
-                    <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative group">
+                    <div className="bg-white dark:bg-slate-800 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-purple-500/10 transition-colors" />
 
                         <div className="flex items-center justify-between mb-8 relative">
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Tür Dağılımı</h3>
-                                <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">Kategori Analizi</p>
+                                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">Tür Dağılımı</h3>
+                                <p className="text-[10px] sm:text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">Kategori Analizi</p>
                             </div>
-                            <Award className="text-purple-600" size={24} />
+                            <Award className="text-purple-600" size={20} />
                         </div>
 
                         <div className="h-[300px] w-full flex flex-col md:flex-row items-center">
@@ -288,19 +288,19 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, unit, icon, gradient }) => (
-    <div className={`bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-700 relative overflow-hidden group`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-slate-100 dark:border-slate-700 relative overflow-hidden group`}>
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-        <div className="relative flex items-center justify-between mb-4">
-            <div className={`p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 group-hover:scale-110 transition-transform duration-300`}>
-                {icon}
+        <div className="relative flex items-center justify-between mb-2 sm:mb-4">
+            <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-900 group-hover:scale-110 transition-transform duration-300`}>
+                {icon && React.cloneElement(icon as React.ReactElement, { size: 18 })}
             </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</p>
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</p>
         </div>
         <div className="relative">
-            <p className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+            <p className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-none">
                 {value}
             </p>
-            <p className="text-xs font-bold text-slate-500 mt-2">{unit}</p>
+            <p className="text-[10px] sm:text-xs font-bold text-slate-500 mt-1 sm:mt-2">{unit}</p>
         </div>
     </div>
 );

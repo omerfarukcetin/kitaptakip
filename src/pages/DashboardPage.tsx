@@ -100,10 +100,10 @@ export const DashboardPage: React.FC = () => {
                 {/* Welcome Section */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-2">
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">
                             Dashboard
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400">Okuma yolculuğuna genel bakış</p>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Okuma yolculuğuna genel bakış</p>
                     </div>
                     <div className="flex items-center gap-3">
                         {showMonthlySummary && (
@@ -119,16 +119,16 @@ export const DashboardPage: React.FC = () => {
                         )}
                         <button
                             onClick={() => setShowBookForm(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                            className="flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
                         >
-                            <Plus size={20} />
+                            <Plus size={18} />
                             Kitap Ekle
                         </button>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <Link to="/library">
                         <StatCard
                             icon={<BookOpen className="text-indigo-600" size={28} />}
@@ -365,13 +365,13 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, bgColor }) => {
     return (
-        <div className={`${bgColor} rounded-2xl p-6 border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all cursor-pointer`}>
+        <div className={`${bgColor} rounded-2xl p-4 sm:p-6 border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all cursor-pointer`}>
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-1">{label}</p>
-                    <p className="text-3xl font-black text-slate-900 dark:text-slate-100">{value}</p>
+                    <p className="text-[10px] sm:text-sm font-bold text-slate-600 dark:text-slate-400 mb-0.5 sm:mb-1">{label}</p>
+                    <p className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">{value}</p>
                 </div>
-                <div>{icon}</div>
+                <div className="hidden sm:block">{icon}</div>
             </div>
         </div>
     );

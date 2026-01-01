@@ -133,11 +133,11 @@ export const BookDetailPage: React.FC = () => {
                             </div>
 
                             {/* Title & Author */}
-                            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-2">
+                            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">
                                 {book.title}
                             </h1>
                             {book.author && (
-                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-2">{book.author}</p>
+                                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-2">{book.author}</p>
                             )}
 
                             {book.rating !== null && book.rating > 0 && (
@@ -148,10 +148,10 @@ export const BookDetailPage: React.FC = () => {
 
                             {/* Info Grid */}
                             <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
-                                <InfoItem label="Toplam Sayfa" value={book.total_pages} />
-                                <InfoItem label="Güncel Sayfa" value={book.current_page} />
+                                <InfoItem label="Top. Sayfa" value={book.total_pages} />
+                                <InfoItem label="Gün. Sayfa" value={book.current_page} />
                                 {book.isbn && <InfoItem label="ISBN" value={book.isbn} />}
-                                {book.rating && <InfoItem label="Değerlendirme" value={`${book.rating}/5 ⭐`} />}
+                                {book.rating && <InfoItem label="Puan" value={`${book.rating}/5 ⭐`} />}
                                 {book.started_at && (
                                     <InfoItem
                                         label="Başlangıç"
@@ -160,7 +160,7 @@ export const BookDetailPage: React.FC = () => {
                                 )}
                                 {book.completed_at && (
                                     <InfoItem
-                                        label="Bitiş"
+                                        label="Bitirme"
                                         value={new Date(book.completed_at).toLocaleDateString('tr-TR')}
                                     />
                                 )}
@@ -275,14 +275,14 @@ export const BookDetailPage: React.FC = () => {
                                 <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">Okuma Takvimim</h2>
-                                            <p className="text-slate-600 dark:text-slate-400 text-sm">
+                                            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">Okuma Takvimim</h2>
+                                            <p className="text-slate-600 dark:text-slate-400 text-[10px] sm:text-sm">
                                                 Günlük {plan.daily_pages} sayfa • {formatDate(new Date(plan.start_date))} - {formatDate(new Date(plan.end_date))}
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => setShowReadingPlan(true)}
-                                            className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-sm"
+                                            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
                                         >
                                             Yeni Plan
                                         </button>

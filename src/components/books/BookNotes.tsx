@@ -148,7 +148,7 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h3 className="text-xl font-black text-slate-900">Notlar</h3>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">Notlar</h3>
                     {(filterTag || filterCategory) && (
                         <div className="flex gap-2 mt-2">
                             {filterTag && (
@@ -170,9 +170,9 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                     <ExportBookNotes notes={notes} bookTitle={bookTitle} bookAuthor={bookAuthor} />
                     <button
                         onClick={() => setShowForm(!showForm)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all"
+                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-xs sm:text-sm"
                     >
-                        <Plus size={18} />
+                        <Plus size={16} />
                         Not Ekle
                     </button>
                 </div>
@@ -321,7 +321,7 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                                 }`}></div>
 
                             {/* Content Container */}
-                            <div className="p-8 pl-10">
+                            <div className="p-5 sm:p-8 pl-8 sm:pl-10">
                                 {editingNoteId === note.id ? (
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl mb-4">
@@ -400,10 +400,10 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                                                     {getNoteIcon(note.note_type)}
                                                 </div>
                                                 <div>
-                                                    <span className="font-black text-lg text-slate-800 dark:text-slate-100">{getNoteLabel(note.note_type)}</span>
+                                                    <span className="font-black text-base sm:text-lg text-slate-800 dark:text-slate-100">{getNoteLabel(note.note_type)}</span>
                                                     {note.page_number && (
-                                                        <span className="ml-3 text-sm bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full font-bold text-slate-600 dark:text-slate-300">
-                                                            Sayfa {note.page_number}
+                                                        <span className="ml-2 sm:ml-3 text-[10px] sm:text-sm bg-slate-100 dark:bg-slate-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold text-slate-600 dark:text-slate-300">
+                                                            S. {note.page_number}
                                                         </span>
                                                     )}
                                                 </div>
@@ -433,14 +433,14 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                                         {/* Quote Content with Icon */}
                                         <div className="relative">
                                             {note.title && (
-                                                <h4 className="text-xl font-black text-slate-900 dark:text-slate-100 mb-3 pl-8">
+                                                <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 mb-2 sm:mb-3 pl-6 sm:pl-8">
                                                     {note.title}
                                                 </h4>
                                             )}
                                             {note.note_type === 'quote' && (
-                                                <Quote size={32} className="absolute -left-2 -top-2 text-indigo-200 dark:text-indigo-800 opacity-50" />
+                                                <Quote size={24} className="absolute -left-1 sm:-left-2 -top-1 sm:-top-2 text-indigo-200 dark:text-indigo-800 opacity-50" />
                                             )}
-                                            <div className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-medium pl-8 mb-5 whitespace-pre-line">
+                                            <div className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium pl-6 sm:pl-8 mb-4 sm:mb-5 whitespace-pre-line">
                                                 <NoteLink content={note.content} />
                                             </div>
                                         </div>

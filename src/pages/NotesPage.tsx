@@ -144,7 +144,7 @@ export const NotesPage: React.FC = () => {
                     'bg-gradient-to-b from-green-500 to-emerald-600'
                 }`}></div>
 
-            <div className="p-8 pl-10">
+            <div className="p-5 sm:p-8 pl-8 sm:pl-10">
                 {/* Book Info Header */}
                 {note.book && (
                     <div
@@ -231,10 +231,10 @@ export const NotesPage: React.FC = () => {
                                     {getNoteIcon(note.note_type)}
                                 </div>
                                 <div>
-                                    <span className="font-black text-lg text-slate-800 dark:text-slate-100">{getNoteLabel(note.note_type)}</span>
+                                    <span className="font-black text-base sm:text-lg text-slate-800 dark:text-slate-100">{getNoteLabel(note.note_type)}</span>
                                     {note.page_number && (
-                                        <span className="ml-3 text-sm bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full font-bold text-slate-600 dark:text-slate-300">
-                                            Sayfa {note.page_number}
+                                        <span className="ml-2 sm:ml-3 text-[10px] sm:text-sm bg-slate-100 dark:bg-slate-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold text-slate-600 dark:text-slate-300">
+                                            S. {note.page_number}
                                         </span>
                                     )}
                                 </div>
@@ -275,9 +275,9 @@ export const NotesPage: React.FC = () => {
                                 </h4>
                             )}
                             {note.note_type === 'quote' && (
-                                <Quote size={32} className="absolute -left-2 -top-2 text-indigo-200 dark:text-indigo-800 opacity-50" />
+                                <Quote size={24} className="absolute -left-1 sm:-left-2 -top-1 sm:-top-2 text-indigo-200 dark:text-indigo-800 opacity-50" />
                             )}
-                            <div className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed font-medium pl-8 mb-5 whitespace-pre-line">
+                            <div className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium pl-6 sm:pl-8 mb-4 sm:mb-5 whitespace-pre-line">
                                 <NoteLink content={note.content} />
                             </div>
                         </div>
@@ -368,12 +368,12 @@ export const NotesPage: React.FC = () => {
             <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
                 {/* Header */}
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-2">Tüm Notlarım</h1>
-                    <p className="text-slate-600 dark:text-slate-400 font-medium">Tüm kitaplardan {notes.length} not</p>
+                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">Tüm Notlarım</h1>
+                    <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">Tüm kitaplardan {notes.length} not</p>
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6 space-y-6">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6 space-y-5 sm:space-y-6">
                     {/* Search */}
                     <div className="relative">
                         <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
