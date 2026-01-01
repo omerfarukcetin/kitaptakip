@@ -8,8 +8,6 @@ import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
 import { InteractiveReadingPlan } from '../components/calendar/InteractiveReadingPlan';
-import { SmartAnalysisCard } from '../components/books/SmartAnalysisCard';
-import { BookAIChat } from '../components/books/BookAIChat';
 import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
 import { formatDate, parseISODate } from '../utils/dateUtils';
@@ -30,7 +28,7 @@ export const BookDetailPage: React.FC = () => {
     const [timerActive, setTimerActive] = useState(false);
     const [isTimerFullScreen, setIsTimerFullScreen] = useState(false);
     const [seconds, setSeconds] = useState(0);
-    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(window.innerWidth > 768);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -444,14 +442,6 @@ export const BookDetailPage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mb-8">
-                                        <SmartAnalysisCard
-                                            bookId={book.id}
-                                            totalPages={book.total_pages}
-                                            currentPage={book.current_page}
-                                        />
-                                    </div>
-
                                     <InteractiveReadingPlan
                                         bookId={book.id}
                                         days={generateReadingDays(plan, book.total_pages, plan.starting_page ?? 0)}
@@ -591,11 +581,6 @@ export const BookDetailPage: React.FC = () => {
                     </div>
                 </div>
             )}
-
-            <BookAIChat
-                bookId={book.id}
-                bookTitle={book.title}
-            />
         </Layout >
     );
 };
