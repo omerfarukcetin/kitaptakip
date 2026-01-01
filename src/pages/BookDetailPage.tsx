@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
 import { InteractiveReadingPlan } from '../components/calendar/InteractiveReadingPlan';
 import { SmartAnalysisCard } from '../components/books/SmartAnalysisCard';
+import { BookAIChat } from '../components/books/BookAIChat';
 import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
 import { formatDate, parseISODate } from '../utils/dateUtils';
@@ -590,6 +591,11 @@ export const BookDetailPage: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            <BookAIChat
+                bookId={book.id}
+                bookTitle={book.title}
+            />
         </Layout >
     );
 };
