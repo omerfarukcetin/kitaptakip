@@ -21,6 +21,10 @@ export type Database = {
                     reading_goal_yearly: number;
                     created_at: string;
                     updated_at: string;
+                    xp: number;
+                    gold: number;
+                    avatar_id: string;
+                    kid_level: number;
                 };
                 Insert: {
                     id: string;
@@ -30,6 +34,10 @@ export type Database = {
                     reading_goal_yearly?: number;
                     created_at?: string;
                     updated_at?: string;
+                    xp?: number;
+                    gold?: number;
+                    avatar_id?: string;
+                    kid_level?: number;
                 };
                 Update: {
                     id?: string;
@@ -39,6 +47,10 @@ export type Database = {
                     reading_goal_yearly?: number;
                     created_at?: string;
                     updated_at?: string;
+                    xp?: number;
+                    gold?: number;
+                    avatar_id?: string;
+                    kid_level?: number;
                 };
                 Relationships: [];
             };
@@ -180,6 +192,8 @@ export type Database = {
                     pages_read: number;
                     duration_seconds: number | null;
                     notes: string | null;
+                    emoji_mood: string | null;
+                    voice_summary_url: string | null;
                     created_at: string;
                 };
                 Insert: {
@@ -190,6 +204,8 @@ export type Database = {
                     pages_read: number;
                     duration_seconds?: number | null;
                     notes?: string | null;
+                    emoji_mood?: string | null;
+                    voice_summary_url?: string | null;
                     created_at?: string;
                 };
                 Update: {
@@ -200,6 +216,8 @@ export type Database = {
                     pages_read?: number;
                     duration_seconds?: number | null;
                     notes?: string | null;
+                    emoji_mood?: string | null;
+                    voice_summary_url?: string | null;
                     created_at?: string;
                 };
                 Relationships: [];
@@ -246,21 +264,51 @@ export type Database = {
                 };
                 Relationships: [];
             };
-        };
-        Views: {
-            [_ in never]: never;
-        };
-        Functions: {
-            [_ in never]: never;
-        };
-        Enums: {
-            [_ in never]: never;
-        };
-        CompositeTypes: {
-            [_ in never]: never;
+            kid_rewards: {
+                Row: {
+                    id: string;
+                    user_id: string;
+                    title: string;
+                    price: number;
+                    icon: string | null;
+                    is_claimed: boolean;
+                    created_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    user_id: string;
+                    title: string;
+                    price: number;
+                    icon?: string | null;
+                    is_claimed?: boolean;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    user_id?: string;
+                    title?: string;
+                    price?: number;
+                    icon?: string | null;
+                    is_claimed?: boolean;
+                    created_at?: string;
+                };
+                Relationships: [];
+            };
         };
     };
-}
+    Views: {
+        [_ in never]: never;
+    };
+    Functions: {
+        [_ in never]: never;
+    };
+    Enums: {
+        [_ in never]: never;
+    };
+    CompositeTypes: {
+        [_ in never]: never;
+    };
+};
 
 export type Book = Database['public']['Tables']['books']['Row'];
 export type BookInsert = Database['public']['Tables']['books']['Insert'];

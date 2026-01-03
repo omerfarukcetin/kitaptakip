@@ -7,9 +7,11 @@ import { DashboardPage } from './pages/DashboardPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { BookDetailPage } from './pages/BookDetailPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { BazaarPage } from './pages/BazaarPage';
 import { NotesPage } from './pages/NotesPage';
 import { StatsPage } from './pages/StatsPage';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { KidModeProvider } from './contexts/KidModeContext';
 import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient({
@@ -103,6 +105,14 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
+        path="/bazaar"
+        element={
+          <ProtectedRoute>
+            <BazaarPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/stats"
         element={
           <ProtectedRoute>
@@ -117,11 +127,13 @@ const AppRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </QueryClientProvider>
+      <KidModeProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </KidModeProvider>
     </ThemeProvider>
   );
 };

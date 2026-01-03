@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/shared/Layout';
 import { useBook, useBooks } from '../hooks/useBooks';
 import { useReadingPlan, useReadingProgress } from '../hooks/useReadingPlan';
-import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff, Play, Pause, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Star, MessageSquareQuote, Timer, Zap, Eye, EyeOff, Play, Pause, ChevronDown, ChevronUp, Rocket, Gem, ScrollText, Map as MapIcon } from 'lucide-react';
 import { StarRating } from '../components/shared/StarRating';
 import { Link } from 'react-router-dom';
 import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
@@ -13,6 +13,10 @@ import { BookNotes } from '../components/books/BookNotes';
 import { useDetailedStats } from '../hooks/useDetailedStats';
 import { formatDate, parseISODate } from '../utils/dateUtils';
 import { generateReadingDays, getTodayTargetPage, recalculateEndDate } from '../utils/planUtils';
+import { useAppMode } from '../contexts/KidModeContext';
+import { EnergyTimer } from '../components/kids/EnergyTimer';
+import { KidSessionModal } from '../components/kids/KidSessionModal';
+import { useKidProfile } from '../hooks/useKidProfile';
 import type { ReadingDay } from '../lib/types';
 import type { BookUpdate } from '../lib/database.types';
 
@@ -32,7 +36,13 @@ export const BookDetailPage: React.FC = () => {
     const [seconds, setSeconds] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(window.innerWidth > 768);
     const [manualPage, setManualPage] = useState<number>(0);
+
+    const { mode } = useAppMode();
+    const { updateKidStats } = useKidProfile();
+    const [showKidSessionModal, setShowKidSessionModal] = useState(false);
+    const [kidSessionData, setKidSessionData] = useState<{ pages: number; xp: number; gold: number } | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const isKid = mode === 'kid';
 
     useEffect(() => {
         if (book) setManualPage(book.current_page);
@@ -72,43 +82,92 @@ export const BookDetailPage: React.FC = () => {
         }
     };
 
-    const handleStopTimer = async () => {
+    const handleStopTimer = async (forcedDuration?: number) => {
         setTimerActive(false);
-        const duration = seconds;
-        const newPageStr = prompt(`Okuma bitti! Şu an kaçıncı sayfadasınız? (Mevcut: ${book!.current_page})`, book!.current_page.toString());
+        const duration = forcedDuration !== undefined ? forcedDuration : seconds;
 
-        if (newPageStr !== null) {
-            const newPage = parseInt(newPageStr);
-            if (!isNaN(newPage) && newPage >= book!.current_page) {
-                const pagesRead = newPage - book!.current_page;
-                const today = new Date().toISOString().split('T')[0];
+        if (isKid) {
+            const newPageStr = prompt(`Macera bitti! Şu an kaçıncı sayfadasın? (Mevcut: ${book!.current_page})`, book!.current_page.toString());
+            if (newPageStr !== null) {
+                const newPage = parseInt(newPageStr);
+                if (!isNaN(newPage) && newPage >= book!.current_page) {
+                    const pagesRead = newPage - book!.current_page;
+                    const xp = pagesRead * 10;
+                    const gold = Math.floor(pagesRead / 2); // 2 sayfa = 1 altın
 
-                // Kaydı reading_progress tablosuna ekle
-                await recordSession.mutateAsync({
-                    date: today,
-                    pagesRead: pagesRead,
-                    durationSeconds: duration,
-                    endPage: newPage
-                });
+                    setKidSessionData({ pages: pagesRead, xp, gold });
+                    setShowKidSessionModal(true);
+                }
+            }
+        } else {
+            const newPageStr = prompt(`Okuma bitti! Şu an kaçıncı sayfadasınız? (Mevcut: ${book!.current_page})`, book!.current_page.toString());
 
-                // AKILLI PLAN GÜNCELLEME: Bitiş tarihini öne çek
-                if (plan) {
-                    const newEndDate = recalculateEndDate(newPage, book!.total_pages, plan.daily_pages);
-                    if (newEndDate !== plan.end_date) {
-                        await savePlan.mutateAsync({
-                            book_id: book!.id,
-                            start_date: plan.start_date,
-                            end_date: newEndDate,
-                            daily_pages: plan.daily_pages,
-                            calculation_mode: plan.calculation_mode,
-                            starting_page: plan.starting_page
-                        });
+            if (newPageStr !== null) {
+                const newPage = parseInt(newPageStr);
+                if (!isNaN(newPage) && newPage >= book!.current_page) {
+                    const pagesRead = newPage - book!.current_page;
+                    const today = new Date().toISOString().split('T')[0];
+
+                    await recordSession.mutateAsync({
+                        date: today,
+                        pagesRead: pagesRead,
+                        durationSeconds: duration,
+                        endPage: newPage
+                    });
+
+                    if (plan) {
+                        const newEndDate = recalculateEndDate(newPage, book!.total_pages, plan.daily_pages);
+                        if (newEndDate !== plan.end_date) {
+                            await savePlan.mutateAsync({
+                                book_id: book!.id,
+                                start_date: plan.start_date,
+                                end_date: newEndDate,
+                                daily_pages: plan.daily_pages,
+                                calculation_mode: plan.calculation_mode,
+                                starting_page: plan.starting_page
+                            });
+                        }
                     }
                 }
             }
         }
         setSeconds(0);
         setIsTimerFullScreen(false);
+    };
+
+    const handleKidSessionSave = async (data: { mood: string; voiceUrl: string; pagesRead: number }) => {
+        if (!kidSessionData) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const newPage = book!.current_page + data.pagesRead;
+
+        await recordSession.mutateAsync({
+            date: today,
+            pagesRead: data.pagesRead,
+            durationSeconds: seconds || 1200,
+            endPage: newPage,
+            emoji_mood: data.mood,
+            voice_summary_url: data.voiceUrl
+        } as any);
+
+        await updateKidStats.mutateAsync({
+            xpToAdd: kidSessionData.xp,
+            goldToAdd: kidSessionData.gold
+        });
+
+        if (plan) {
+            const newEndDate = recalculateEndDate(newPage, book!.total_pages, plan.daily_pages);
+            if (newEndDate !== plan.end_date) {
+                await savePlan.mutateAsync({
+                    book_id: book!.id,
+                    start_date: plan.start_date,
+                    end_date: newEndDate,
+                    daily_pages: plan.daily_pages,
+                    calculation_mode: plan.calculation_mode,
+                    starting_page: plan.starting_page
+                });
+            }
+        }
     };
 
     const handleDeletePlan = async () => {
@@ -185,11 +244,15 @@ export const BookDetailPage: React.FC = () => {
             <div className="max-w-7xl mx-auto space-y-6 pb-20 md:pb-8 overflow-x-hidden">
                 {!isFocusMode && (
                     <Link
-                        to="/library"
-                        className="inline-flex items-center gap-2 text-slate-600 hover:text-indigo-600 font-bold transition-colors mb-2 block"
+                        to={isKid ? "/dashboard" : "/library"}
+                        className={`inline-flex items-center gap-2 font-bold transition-colors mb-2 block ${isKid ? 'text-orange-600 hover:text-orange-700' : 'text-slate-600 hover:text-indigo-600'
+                            }`}
                     >
-                        <ArrowLeft size={20} />
-                        Kütüphaneye Dön
+                        {isKid ? (
+                            <><MapIcon size={20} /> Haritaya Dön</>
+                        ) : (
+                            <><ArrowLeft size={20} /> Kütüphaneye Dön</>
+                        )}
                     </Link>
                 )}
 
@@ -218,11 +281,13 @@ export const BookDetailPage: React.FC = () => {
                                 </div>
 
                                 {/* Title & Author */}
-                                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2 break-words">
+                                <h1 className={`text-xl sm:text-2xl font-black mb-1 sm:mb-2 break-words ${isKid ? 'text-orange-900 dark:text-orange-100 italic' : 'text-slate-900 dark:text-slate-100'
+                                    }`}>
                                     {book.title}
                                 </h1>
                                 {book.author && (
-                                    <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-2 break-words">{book.author}</p>
+                                    <p className={`text-base sm:text-lg mb-2 break-words ${isKid ? 'text-orange-600 dark:text-orange-400 font-bold' : 'text-slate-600 dark:text-slate-400'
+                                        }`}>{book.author}</p>
                                 )}
 
                                 {book.rating !== null && book.rating > 0 && (
@@ -268,17 +333,11 @@ export const BookDetailPage: React.FC = () => {
                                                 }}
                                             />
                                         </div>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-                                            {book.total_pages - book.current_page} sayfa kaldı
-                                        </p>
-
-                                        {/* Manual Page Input */}
                                         <div className="mt-3 flex items-center gap-2">
                                             <input
                                                 type="number"
                                                 min="0"
                                                 max={book.total_pages}
-                                                placeholder="Sayfa"
                                                 className="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100"
                                                 value={manualPage}
                                                 onChange={(e) => setManualPage(parseInt(e.target.value) || 0)}
@@ -299,69 +358,6 @@ export const BookDetailPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {book.status === 'reading' && speedMetrics.avgPagesPerDay > 0 && (
-                                    <div className="mb-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
-                                        <div className="flex items-center gap-2 mb-1 text-indigo-700 dark:text-indigo-400">
-                                            <Zap size={16} className="fill-indigo-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">Hızına Göre Tahmin</span>
-                                        </div>
-                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                            Günde ortalama {speedMetrics.avgPagesPerDay} sayfa okuyorsun.
-                                            Bu hızla kitabı <span className="text-indigo-600 dark:text-indigo-400 underline decoration-indigo-200">
-                                                {formatDate(new Date(Date.now() + ((book.total_pages - book.current_page) / speedMetrics.avgPagesPerDay) * 24 * 60 * 60 * 1000))}
-                                            </span> tarihinde bitirebilirsin.
-                                        </p>
-                                    </div>
-                                )}
-
-                                {book.description && (
-                                    <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
-                                        <button
-                                            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                                            className="flex items-center justify-between w-full text-slate-900 dark:text-slate-100 mb-2 group"
-                                        >
-                                            <h3 className="font-bold text-sm">Kitap Hakkında</h3>
-                                            <div className="text-slate-400 group-hover:text-indigo-600 transition-colors">
-                                                {isDescriptionExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                                            </div>
-                                        </button>
-                                        {isDescriptionExpanded && (
-                                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line animate-in fade-in slide-in-from-top-2 duration-300">
-                                                {book.description}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                {(book as any).review && (
-                                    <div className="mb-6 p-5 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
-                                        <div className="flex items-center gap-2 mb-3 text-amber-700 dark:text-amber-400">
-                                            <MessageSquareQuote size={18} />
-                                            <h3 className="font-black text-sm uppercase tracking-wider">Final İncelemesi</h3>
-                                        </div>
-                                        <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed text-sm sm:text-base">
-                                            "{(book as any).review}"
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Categories */}
-                                {book.categories && book.categories.length > 0 && (
-                                    <div className="mb-4">
-                                        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-2 text-sm">Kategoriler</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {book.categories.map((category, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg font-bold text-xs"
-                                                >
-                                                    {category}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="flex gap-2 mb-4">
                                     <button
                                         onClick={() => {
@@ -374,20 +370,26 @@ export const BookDetailPage: React.FC = () => {
                                             }
                                         }}
                                         className={`flex-1 px-4 py-3 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${timerActive
-                                            ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
-                                            : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                                ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
+                                                : isKid
+                                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95'
+                                                    : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                             }`}
                                     >
-                                        <Timer size={20} />
-                                        {timerActive ? `Duraklat (${formatTime(seconds)})` : 'Okumaya Başla'}
+                                        {isKid ? <Rocket size={20} /> : <Timer size={20} />}
+                                        {timerActive
+                                            ? `Duraklat (${formatTime(seconds)})`
+                                            : isKid ? 'Maceraya Başla!' : 'Okumaya Başla'}
                                     </button>
-                                    <button
-                                        onClick={() => setIsFocusMode(!isFocusMode)}
-                                        className="px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center"
-                                        title="Odak Modu"
-                                    >
-                                        {isFocusMode ? <Eye size={20} /> : <EyeOff size={20} />}
-                                    </button>
+                                    {!isKid && (
+                                        <button
+                                            onClick={() => setIsFocusMode(!isFocusMode)}
+                                            className="px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center"
+                                            title="Odak Modu"
+                                        >
+                                            {isFocusMode ? <Eye size={20} /> : <EyeOff size={20} />}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Action Buttons */}
@@ -411,9 +413,9 @@ export const BookDetailPage: React.FC = () => {
                         </div>
                     )}
 
-                    {/* RIGHT COLUMN - Reading Plan */}
+                    {/* RIGHT COLUMN */}
                     <div className={`${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''} space-y-6 min-w-0 overflow-hidden md:overflow-visible`}>
-                        {isFocusMode && (
+                        {isFocusMode && !isKid && (
                             <div className="flex items-center justify-between bg-indigo-600 text-white p-6 rounded-3xl shadow-xl animate-in slide-in-from-top duration-500">
                                 <div>
                                     <h2 className="text-2xl font-black">Odak Modu</h2>
@@ -430,94 +432,68 @@ export const BookDetailPage: React.FC = () => {
                                     >
                                         <Eye size={24} />
                                     </button>
-                                    {!isTimerFullScreen && (
-                                        <button
-                                            onClick={() => setIsTimerFullScreen(true)}
-                                            className="p-3 bg-white/20 hover:bg-white/30 rounded-2xl transition-all"
-                                            title="Zamanlayıcıyı Büyüt"
-                                        >
-                                            <Timer size={24} />
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         )}
                         {plan ? (
-                            <>
-                                {/* Reading Plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div>
-                                            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">Okuma Takvimim</h2>
-                                            <p className="text-slate-600 dark:text-slate-400 text-[10px] sm:text-sm">
-                                                Günlük {plan.daily_pages} sayfa • {formatDate(new Date(plan.start_date))} - {formatDate(new Date(plan.end_date))}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => setShowReadingPlan(true)}
-                                                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
-                                            >
-                                                Yeni Plan
-                                            </button>
-                                            <button
-                                                onClick={handleDeletePlan}
-                                                className="p-1.5 sm:p-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
-                                                title="Planı Sil"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">
+                                            {isKid ? 'Okuma Takvimim' : 'Okuma Takvimim'}
+                                        </h2>
+                                        <p className="text-slate-600 dark:text-slate-400 text-[10px] sm:text-sm">
+                                            Günlük {plan.daily_pages} sayfa • {formatDate(new Date(plan.start_date))} - {formatDate(new Date(plan.end_date))}
+                                        </p>
                                     </div>
-
-                                    <InteractiveReadingPlan
-                                        bookId={book.id}
-                                        days={generateReadingDays(plan, book.total_pages, plan.starting_page ?? 0)}
-                                        startDate={plan.start_date}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setShowReadingPlan(true)}
+                                            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
+                                        >
+                                            Yeni Plan
+                                        </button>
+                                        <button
+                                            onClick={handleDeletePlan}
+                                            className="p-1.5 sm:p-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-xl transition-all text-xs sm:text-sm"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
 
-                                {/* Notes below reading plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
-                                    <BookNotes
-                                        bookId={book.id}
-                                        bookTitle={book.title}
-                                        bookAuthor={book.author || undefined}
-                                    />
-                                </div>
-                            </>
+                                <InteractiveReadingPlan
+                                    bookId={book.id}
+                                    days={generateReadingDays(plan, book.total_pages, plan.starting_page ?? 0)}
+                                    startDate={plan.start_date}
+                                />
+                            </div>
                         ) : (
-                            <>
-                                {/* Create Plan CTA */}
-                                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 text-white text-center">
-                                    <Calendar size={48} className="mx-auto mb-4" />
-                                    <h2 className="text-2xl font-black mb-2">Okuma Takvimi</h2>
-                                    <p className="text-indigo-100 mb-6">
-                                        Bu kitap için özel okuma planı oluştur ve ilerlemeni takip et
-                                    </p>
-                                    <button
-                                        onClick={() => setShowReadingPlan(true)}
-                                        className="px-8 py-3 bg-white text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl transition-all"
-                                    >
-                                        Plan Oluştur
-                                    </button>
-                                </div>
-
-                                {/* Notes when no plan */}
-                                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
-                                    <BookNotes
-                                        bookId={book.id}
-                                        bookTitle={book.title}
-                                        bookAuthor={book.author || undefined}
-                                    />
-                                </div>
-                            </>
+                            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 text-white text-center">
+                                <Calendar size={48} className="mx-auto mb-4" />
+                                <h2 className="text-2xl font-black mb-2">Okuma Takvimi</h2>
+                                <p className="text-indigo-100 mb-6">
+                                    Bu kitap için özel okuma planı oluştur ve ilerlemeni takip et
+                                </p>
+                                <button
+                                    onClick={() => setShowReadingPlan(true)}
+                                    className="px-8 py-3 bg-white text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl transition-all"
+                                >
+                                    Plan Oluştur
+                                </button>
+                            </div>
                         )}
+                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
+                            <BookNotes
+                                bookId={book.id}
+                                bookTitle={book.title}
+                                bookAuthor={book.author || undefined}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Modals */}
             <ReadingPlanModal
                 isOpen={showReadingPlan}
                 onClose={() => setShowReadingPlan(false)}
@@ -528,92 +504,87 @@ export const BookDetailPage: React.FC = () => {
                 onPlanCreated={handlePlanCreated}
             />
 
-            {
-                showEditForm && (
-                    <BookForm
-                        initialData={book}
-                        onSubmit={handleEdit}
-                        onCancel={() => setShowEditForm(false)}
-                        loading={updateBook.isPending}
-                    />
-                )
-            }
-            {isTimerFullScreen && (
-                <div className="fixed inset-0 z-50 bg-indigo-600 flex flex-col items-center justify-center text-white p-8 animate-in fade-in duration-500">
-                    <div className="max-w-xl w-full text-center space-y-12">
-                        <div className="space-y-4">
-                            <h2 className="text-2xl sm:text-3xl font-black opacity-80">{book.title}</h2>
-                            <p className="text-lg font-bold opacity-60">Şu an harika bir maceradasın...</p>
-                            {plan && (
-                                <div className="mt-4 p-4 bg-white/10 rounded-2xl inline-block border border-white/10">
-                                    <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider opacity-90">
-                                        <Zap size={16} className="text-yellow-400" />
-                                        <span>Bugünkü Hedef: {plan.daily_pages} Sayfa</span>
-                                    </div>
-                                    <div className="text-xs opacity-60 mt-1 font-bold">
-                                        {book.current_page >= (getTodayTargetPage(plan, book.total_pages) || 0)
-                                            ? "Tebrikler! Bugünkü hedefini tamamladın. 🚀"
-                                            : `Hedefe ${(getTodayTargetPage(plan, book.total_pages) || 0) - book.current_page} sayfa kaldı.`
-                                        }
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+            {showEditForm && (
+                <BookForm
+                    initialData={book}
+                    onSubmit={handleEdit}
+                    onCancel={() => setShowEditForm(false)}
+                    loading={updateBook.isPending}
+                />
+            )}
 
-                        <div className="relative inline-block">
+            {isTimerFullScreen && (
+                isKid ? (
+                    <EnergyTimer
+                        bookTitle={book.title}
+                        onFinish={(duration) => handleStopTimer(duration)}
+                        onCancel={() => {
+                            setTimerActive(false);
+                            setIsTimerFullScreen(false);
+                            setSeconds(0);
+                        }}
+                    />
+                ) : (
+                    <div className="fixed inset-0 z-50 bg-indigo-600 flex flex-col items-center justify-center text-white p-8 animate-in fade-in duration-500">
+                        <div className="max-w-xl w-full text-center space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-2xl sm:text-3xl font-black opacity-80">{book.title}</h2>
+                                <p className="text-lg font-bold opacity-60">Şu an odak modundasın...</p>
+                                {plan && (
+                                    <div className="mt-4 p-4 bg-white/10 rounded-2xl inline-block border border-white/10">
+                                        <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider opacity-90">
+                                            <Zap size={16} className="text-yellow-400" />
+                                            <span>Bugünkü Hedef: {plan.daily_pages} Sayfa</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="text-[100px] sm:text-[150px] font-black font-mono leading-none tracking-tighter">
                                 {formatTime(seconds)}
                             </div>
-                            <div className="absolute -top-4 -right-8">
-                                <Zap className="text-yellow-400 animate-bounce" size={48} />
+
+                            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8">
+                                <button
+                                    onClick={() => setTimerActive(!timerActive)}
+                                    className={`w-full sm:w-auto px-8 py-5 rounded-[2rem] font-black text-xl transition-all border-2 flex items-center justify-center gap-3 ${timerActive
+                                        ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
+                                        : 'bg-yellow-400 border-yellow-400 text-indigo-900 shadow-xl scale-105'
+                                        }`}
+                                >
+                                    {timerActive ? <><Pause size={24} /> Duraklat</> : <><Play size={24} /> Devam Et</>}
+                                </button>
+                                <button
+                                    onClick={() => handleStopTimer()}
+                                    className="w-full sm:w-auto px-12 py-5 bg-white text-indigo-600 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-105 transition-all"
+                                >
+                                    Okumayı Bitir
+                                </button>
+                                <button
+                                    onClick={() => setIsTimerFullScreen(false)}
+                                    className="w-full sm:w-auto px-8 py-5 bg-white/10 hover:bg-white/20 text-white rounded-[2rem] font-black text-xl transition-all border border-white/20"
+                                >
+                                    Geri Dön
+                                </button>
                             </div>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8">
-                            <button
-                                onClick={() => setTimerActive(!timerActive)}
-                                className={`w-full sm:w-auto px-8 py-5 rounded-[2rem] font-black text-xl transition-all border-2 flex items-center justify-center gap-3 ${timerActive
-                                    ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
-                                    : 'bg-yellow-400 border-yellow-400 text-indigo-900 shadow-xl scale-105'
-                                    }`}
-                            >
-                                {timerActive ? (
-                                    <>
-                                        <Pause size={24} />
-                                        Duraklat
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play size={24} />
-                                        Devam Et
-                                    </>
-                                )}
-                            </button>
-                            <button
-                                onClick={() => handleStopTimer()}
-                                className="w-full sm:w-auto px-12 py-5 bg-white text-indigo-600 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-105 transition-all"
-                            >
-                                Okumayı Bitir
-                            </button>
-                            <button
-                                onClick={() => setIsTimerFullScreen(false)}
-                                className="w-full sm:w-auto px-8 py-5 bg-white/10 hover:bg-white/20 text-white rounded-[2rem] font-black text-xl transition-all border border-white/20"
-                            >
-                                Notlara Dön
-                            </button>
-                        </div>
                     </div>
-
-                    <div className="absolute bottom-12 left-0 right-0 text-center opacity-40 font-black tracking-widest uppercase text-xs">
-                        OkurNot • Odak Modu Etkin
-                    </div>
-                </div>
+                )
             )}
-        </Layout >
+
+            {isKid && (
+                <KidSessionModal
+                    isOpen={showKidSessionModal}
+                    onClose={() => setShowKidSessionModal(false)}
+                    onSave={handleKidSessionSave}
+                    pagesRead={kidSessionData?.pages || 0}
+                    xpEarned={kidSessionData?.xp || 0}
+                    goldEarned={kidSessionData?.gold || 0}
+                />
+            )}
+        </Layout>
     );
 };
-
-
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const styles = {
@@ -629,23 +600,16 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     };
 
     return (
-        <span
-            className={`inline-block px-4 py-2 rounded-xl text-sm font-bold ${styles[status as keyof typeof styles]}`}
-        >
+        <span className={`inline-block px-4 py-2 rounded-xl text-sm font-bold ${styles[status as keyof typeof styles]}`}>
             {labels[status as keyof typeof labels]}
         </span>
     );
 };
 
-const InfoItem: React.FC<{ label: string; value: string | number }> = ({
-    label,
-    value,
-}) => {
+const InfoItem: React.FC<{ label: string; value: string | number }> = ({ label, value }) => {
     return (
         <div>
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                {label}
-            </p>
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
             <p className="text-sm font-black text-slate-900 dark:text-slate-100 break-all">{value}</p>
         </div>
     );
