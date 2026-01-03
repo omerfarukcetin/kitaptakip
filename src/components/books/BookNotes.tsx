@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Quote, Lightbulb, FileText, Trash2, Tag, Edit2, Check, X, Camera, Loader2 } from 'lucide-react';
-import Tesseract from 'tesseract.js';
+import { Plus, Quote, Lightbulb, FileText, Trash2, Tag, Edit2, Check, X, Camera, Loader2, Sparkles } from 'lucide-react';
+import { recognizeText } from '../../utils/ocrUtils';
 import { useBookNotes } from '../../hooks/useBookNotes';
 import { useAllNotes } from '../../hooks/useAllNotes';
 import { NoteStoryExport } from './NoteStoryExport';
@@ -28,6 +28,7 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
     const [filterCategory, setFilterCategory] = useState<string | null>(null);
     const [title, setTitle] = useState('');
     const [isProcessingOCR, setIsProcessingOCR] = useState(false);
+    const [ocrProgress, setOcrProgress] = useState(0);
 
     const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState('');
@@ -131,16 +132,20 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
         if (!file) return;
 
         setIsProcessingOCR(true);
+        setOcrProgress(0);
         try {
-            const worker = await Tesseract.createWorker('tur');
-            const { data: { text } } = await worker.recognize(file);
-            setContent(prev => prev + (prev ? '\n' : '') + text.trim());
-            await worker.terminate();
+            const text = await recognizeText(file, (p) => {
+                if (p.status === 'recognizing') {
+                    setOcrProgress(Math.round(p.progress * 100));
+                }
+            });
+            setContent(prev => prev + (prev ? '\n' : '') + text);
         } catch (error) {
             console.error('OCR Hatası:', error);
-            alert('Metin tarama sırasında bir hata oluştu.');
+            alert('Metin tarama sırasında bir hata oluştu: ' + (error as Error).message);
         } finally {
             setIsProcessingOCR(false);
+            setOcrProgress(0);
         }
     };
 
@@ -244,13 +249,35 @@ export const BookNotes: React.FC<BookNotesProps> = ({ bookId, bookTitle = '', bo
                                         />
                                     </label>
                                 </div>
-                                <textarea
-                                    value={content}
-                                    onChange={(e) => setContent(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[150px] text-sm font-medium resize-none"
-                                    placeholder="Notunu buraya yaz veya görselden tara..."
-                                    required
-                                />
+                                <div className="relative">
+                                    <textarea
+                                        value={content}
+                                        onChange={(e) => setContent(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[150px] text-sm font-medium resize-none text-slate-900 dark:text-slate-100"
+                                        placeholder="Notunu buraya yaz veya görselden tara..."
+                                        required
+                                    />
+                                    {isProcessingOCR && (
+                                        <div className="absolute inset-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-[2px] rounded-xl flex flex-col items-center justify-center p-6 transition-all">
+                                            <div className="w-full max-w-[200px] space-y-3 text-center">
+                                                <div className="flex justify-center">
+                                                    <div className="relative">
+                                                        <Sparkles className="text-indigo-600 animate-pulse" size={32} />
+                                                        <Loader2 className="absolute -top-1 -right-1 text-indigo-400 animate-spin" size={16} />
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm font-black text-slate-900 dark:text-slate-100">Metin Çözümleniyor...</p>
+                                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-indigo-600 transition-all duration-300 ease-out"
+                                                        style={{ width: `${ocrProgress}%` }}
+                                                    ></div>
+                                                </div>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">%{ocrProgress} Tamamlandı</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

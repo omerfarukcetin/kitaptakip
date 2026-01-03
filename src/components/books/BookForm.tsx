@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Search, Loader2, Star } from 'lucide-react';
+import { X, Search, Loader2, Star, Camera, Sparkles } from 'lucide-react';
 import { StarRating } from '../shared/StarRating';
+import { recognizeText, extractISBN } from '../../utils/ocrUtils';
 import { searchBookByISBN, extractBookData } from '../../lib/googleBooks';
 import type { BookInsert } from '../../lib/database.types';
 
@@ -19,6 +20,8 @@ export const BookForm: React.FC<BookFormProps> = ({
 }) => {
     const [isbn, setIsbn] = useState('');
     const [searchingISBN, setSearchingISBN] = useState(false);
+    const [isScanningISBN, setIsScanningISBN] = useState(false);
+    const [scanProgress, setScanProgress] = useState(0);
     const [formData, setFormData] = useState<Partial<BookInsert>>({
         title: initialData?.title || '',
         author: initialData?.author || '',
@@ -34,6 +37,39 @@ export const BookForm: React.FC<BookFormProps> = ({
         rating: initialData?.rating || 0,
         review: (initialData as any)?.review || '',
     });
+
+    const handleISBNScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsScanningISBN(true);
+        setScanProgress(0);
+        try {
+            const text = await recognizeText(file, (p) => {
+                if (p.status === 'recognizing') {
+                    setScanProgress(Math.round(p.progress * 100));
+                }
+            });
+
+            const detectedISBN = extractISBN(text);
+            if (detectedISBN) {
+                setIsbn(detectedISBN);
+                // Trigger search automatically if ISBN found
+                setTimeout(() => {
+                    const searchBtn = document.getElementById('isbn-search-btn');
+                    searchBtn?.click();
+                }, 100);
+            } else {
+                alert('Görselde geçerli bir ISBN numarası bulunamadı. Lütfen barkodu daha net çekin veya manuel girin.');
+            }
+        } catch (error) {
+            console.error('ISBN Scan Error:', error);
+            alert('Tarama hatası: ' + (error as Error).message);
+        } finally {
+            setIsScanningISBN(false);
+            setScanProgress(0);
+        }
+    };
 
     const handleISBNSearch = async () => {
         if (!isbn.trim()) return;
@@ -108,10 +144,32 @@ export const BookForm: React.FC<BookFormProps> = ({
                                     value={isbn}
                                     onChange={(e) => setIsbn(e.target.value)}
                                 />
+                                <label className={`flex items-center justify-center p-3 sm:px-4 rounded-xl border-2 border-dashed transition-all cursor-pointer ${isScanningISBN
+                                    ? 'bg-indigo-50 border-indigo-400 text-indigo-600'
+                                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 dark:bg-slate-800/50 dark:border-slate-700'
+                                    }`}>
+                                    {isScanningISBN ? (
+                                        <div className="flex flex-col items-center">
+                                            <Loader2 size={18} className="animate-spin mb-1" />
+                                            <span className="text-[8px] font-black italic">%{scanProgress}</span>
+                                        </div>
+                                    ) : (
+                                        <Camera size={20} />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={handleISBNScan}
+                                        className="hidden"
+                                        disabled={isScanningISBN}
+                                    />
+                                </label>
                                 <button
+                                    id="isbn-search-btn"
                                     type="button"
                                     onClick={handleISBNSearch}
-                                    disabled={searchingISBN}
+                                    disabled={searchingISBN || isScanningISBN}
                                     className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white font-bold rounded-xl transition-all flex items-center gap-2"
                                 >
                                     {searchingISBN ? (
