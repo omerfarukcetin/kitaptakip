@@ -64,7 +64,19 @@ export const BookForm: React.FC<BookFormProps> = ({
             alert('Lütfen en az kitap adı ve sayfa sayısını girin.');
             return;
         }
-        await onSubmit(formData);
+
+        if (formData.current_page && formData.current_page > formData.total_pages) {
+            alert('Mevcut sayfa, toplam sayfa sayısından büyük olamaz.');
+            return;
+        }
+
+        // Clean up data for update/insert
+        const cleanData = { ...formData };
+        if (cleanData.status !== 'completed') {
+            (cleanData as any).review = null;
+        }
+
+        await onSubmit(cleanData);
     };
 
     return (

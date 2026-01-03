@@ -10,6 +10,7 @@ import { ReadingPlanModal } from '../components/calendar/ReadingPlanModal';
 import { InteractiveReadingPlan } from '../components/calendar/InteractiveReadingPlan';
 import { BookForm } from '../components/books/BookForm';
 import { BookNotes } from '../components/books/BookNotes';
+import { useDetailedStats } from '../hooks/useDetailedStats';
 import { formatDate, parseISODate } from '../utils/dateUtils';
 import { generateReadingDays, getTodayTargetPage, recalculateEndDate } from '../utils/planUtils';
 import type { ReadingDay } from '../lib/types';
@@ -20,6 +21,7 @@ export const BookDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { book, isLoading } = useBook(id!);
     const { updateBook, deleteBook } = useBooks();
+    const { speedMetrics } = useDetailedStats(new Date().getFullYear());
     const { plan, savePlan, deletePlan } = useReadingPlan(id!);
     const { recordSession } = useReadingProgress(id!);
     const [showReadingPlan, setShowReadingPlan] = useState(false);
@@ -294,6 +296,21 @@ export const BookDetailPage: React.FC = () => {
                                             />
                                             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">/ {book.total_pages}</span>
                                         </div>
+                                    </div>
+                                )}
+
+                                {book.status === 'reading' && speedMetrics.avgPagesPerDay > 0 && (
+                                    <div className="mb-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                                        <div className="flex items-center gap-2 mb-1 text-indigo-700 dark:text-indigo-400">
+                                            <Zap size={16} className="fill-indigo-500" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Hızına Göre Tahmin</span>
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                            Günde ortalama {speedMetrics.avgPagesPerDay} sayfa okuyorsun.
+                                            Bu hızla kitabı <span className="text-indigo-600 dark:text-indigo-400 underline decoration-indigo-200">
+                                                {formatDate(new Date(Date.now() + ((book.total_pages - book.current_page) / speedMetrics.avgPagesPerDay) * 24 * 60 * 60 * 1000))}
+                                            </span> tarihinde bitirebilirsin.
+                                        </p>
                                     </div>
                                 )}
 
