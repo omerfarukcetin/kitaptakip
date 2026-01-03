@@ -17,6 +17,7 @@ import { useAppMode } from '../contexts/KidModeContext';
 import { EnergyTimer } from '../components/kids/EnergyTimer';
 import { KidSessionModal } from '../components/kids/KidSessionModal';
 import { useKidProfile } from '../hooks/useKidProfile';
+import { SmartAnalysisCard } from '../components/books/SmartAnalysisCard';
 import type { ReadingDay } from '../lib/types';
 import type { BookUpdate } from '../lib/database.types';
 
@@ -370,10 +371,10 @@ export const BookDetailPage: React.FC = () => {
                                             }
                                         }}
                                         className={`flex-1 px-4 py-3 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${timerActive
-                                                ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
-                                                : isKid
-                                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95'
-                                                    : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                            ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
+                                            : isKid
+                                                ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95'
+                                                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                             }`}
                                     >
                                         {isKid ? <Rocket size={20} /> : <Timer size={20} />}
@@ -435,6 +436,16 @@ export const BookDetailPage: React.FC = () => {
                                 </div>
                             </div>
                         )}
+
+                        {!isKid && (
+                            <SmartAnalysisCard
+                                bookId={book.id}
+                                totalPages={book.total_pages}
+                                currentPage={book.current_page}
+                                fallbackPPM={parseFloat(speedMetrics.avgSpeedPPM)}
+                            />
+                        )}
+
                         {plan ? (
                             <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                                 <div className="flex items-center justify-between mb-6">
