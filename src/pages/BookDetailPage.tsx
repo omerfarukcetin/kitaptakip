@@ -29,7 +29,12 @@ export const BookDetailPage: React.FC = () => {
     const [isTimerFullScreen, setIsTimerFullScreen] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(window.innerWidth > 768);
+    const [manualPage, setManualPage] = useState<number>(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (book) setManualPage(book.current_page);
+    }, [book?.current_page]);
 
     useEffect(() => {
         if (timerActive) {
@@ -273,11 +278,17 @@ export const BookDetailPage: React.FC = () => {
                                                 max={book.total_pages}
                                                 placeholder="Sayfa"
                                                 className="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100"
-                                                defaultValue={book.current_page}
+                                                value={manualPage}
+                                                onChange={(e) => setManualPage(parseInt(e.target.value) || 0)}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
                                                         const newPage = parseInt((e.target as HTMLInputElement).value);
                                                         handlePageUpdate(newPage);
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    if (manualPage !== book.current_page) {
+                                                        handlePageUpdate(manualPage);
                                                     }
                                                 }}
                                             />

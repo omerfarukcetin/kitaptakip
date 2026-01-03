@@ -58,8 +58,9 @@ export const useBooks = (status?: BookStatus) => {
             if (error) throw error;
             return data as Book;
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['books'] });
+            queryClient.invalidateQueries({ queryKey: ['book', variables.id] });
         },
     });
 
@@ -96,8 +97,9 @@ export const useBooks = (status?: BookStatus) => {
             if (error) throw error;
             return data as Book;
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['books'] });
+            queryClient.invalidateQueries({ queryKey: ['book', variables.id] });
         },
     });
 
