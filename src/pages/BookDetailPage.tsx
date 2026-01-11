@@ -17,6 +17,7 @@ import { useAppMode } from '../contexts/KidModeContext';
 import { EnergyTimer } from '../components/kids/EnergyTimer';
 import { KidSessionModal } from '../components/kids/KidSessionModal';
 import { useKidProfile } from '../hooks/useKidProfile';
+import { ManualReadingModal } from '../components/books/ManualReadingModal';
 import type { ReadingDay } from '../lib/types';
 import type { BookUpdate } from '../lib/database.types';
 
@@ -40,6 +41,7 @@ export const BookDetailPage: React.FC = () => {
     const { mode } = useAppMode();
     const { updateKidStats } = useKidProfile();
     const [showKidSessionModal, setShowKidSessionModal] = useState(false);
+    const [showManualEntry, setShowManualEntry] = useState(false);
     const [kidSessionData, setKidSessionData] = useState<{ pages: number; xp: number; gold: number } | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const isKid = mode === 'kid';
@@ -370,10 +372,10 @@ export const BookDetailPage: React.FC = () => {
                                             }
                                         }}
                                         className={`flex-1 px-4 py-3 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${timerActive
-                                                ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
-                                                : isKid
-                                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95'
-                                                    : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                            ? 'bg-red-600 text-white shadow-lg shadow-red-200 animate-pulse'
+                                            : isKid
+                                                ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95'
+                                                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                             }`}
                                     >
                                         {isKid ? <Rocket size={20} /> : <Timer size={20} />}
@@ -383,11 +385,12 @@ export const BookDetailPage: React.FC = () => {
                                     </button>
                                     {!isKid && (
                                         <button
-                                            onClick={() => setIsFocusMode(!isFocusMode)}
-                                            className="px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center"
-                                            title="Odak Modu"
+                                            onClick={() => setShowManualEntry(true)}
+                                            className="px-4 py-3 bg-white dark:bg-slate-800 text-indigo-600 border-2 border-indigo-600 rounded-2xl font-black hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all flex items-center justify-center gap-2"
+                                            title="Manuel Kayıt"
                                         >
-                                            {isFocusMode ? <Eye size={20} /> : <EyeOff size={20} />}
+                                            <Edit size={20} />
+                                            <span className="hidden sm:inline">Manuel</span>
                                         </button>
                                     )}
                                 </div>
@@ -582,6 +585,17 @@ export const BookDetailPage: React.FC = () => {
                     goldEarned={kidSessionData?.gold || 0}
                 />
             )}
+
+            <ManualReadingModal
+                isOpen={showManualEntry}
+                onClose={() => setShowManualEntry(false)}
+                bookTitle={book.title}
+                currentPage={book.current_page}
+                totalPages={book.total_pages}
+                onSave={async (data) => {
+                    await recordSession.mutateAsync(data);
+                }}
+            />
         </Layout>
     );
 };
