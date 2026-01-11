@@ -18,6 +18,7 @@ import { EnergyTimer } from '../components/kids/EnergyTimer';
 import { KidSessionModal } from '../components/kids/KidSessionModal';
 import { useKidProfile } from '../hooks/useKidProfile';
 import { ManualReadingModal } from '../components/books/ManualReadingModal';
+import { SmartAnalysisCard } from '../components/books/SmartAnalysisCard';
 import type { ReadingDay } from '../lib/types';
 import type { BookUpdate } from '../lib/database.types';
 
@@ -438,6 +439,16 @@ export const BookDetailPage: React.FC = () => {
                                 </div>
                             </div>
                         )}
+
+                        {!isKid && (
+                            <SmartAnalysisCard
+                                bookId={book.id}
+                                totalPages={book.total_pages}
+                                currentPage={book.current_page}
+                                fallbackPPM={parseFloat(speedMetrics.avgSpeedPPM)}
+                            />
+                        )}
+
                         {plan ? (
                             <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-5 sm:p-6">
                                 <div className="flex items-center justify-between mb-6">

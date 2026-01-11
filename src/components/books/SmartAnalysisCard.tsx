@@ -8,16 +8,20 @@ interface SmartAnalysisCardProps {
     bookId: string;
     totalPages: number;
     currentPage: number;
+    fallbackPPM?: number;
 }
 
 export const SmartAnalysisCard: React.FC<SmartAnalysisCardProps> = ({
     bookId,
     totalPages,
     currentPage,
+    fallbackPPM,
 }) => {
-    const { analysis, isLoading } = useSmartAnalysis(bookId, totalPages, currentPage);
+    const { analysis, isLoading } = useSmartAnalysis(bookId, totalPages, currentPage, fallbackPPM);
 
-    if (isLoading || analysis.totalSessions === 0) return null;
+    if (isLoading) return null;
+
+    const isUsingFallback = analysis.totalSessions === 0 && (fallbackPPM || 0) > 0;
 
     return (
         <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg p-6 border border-indigo-100 dark:border-indigo-900/20 overflow-hidden relative">
@@ -25,11 +29,18 @@ export const SmartAnalysisCard: React.FC<SmartAnalysisCardProps> = ({
                 <Brain size={120} />
             </div>
 
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-indigo-600 rounded-xl text-white">
-                    <Brain size={20} />
+            <div className="flex items-center justify-between mb-6 relative">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-600 rounded-xl text-white">
+                        <Brain size={20} />
+                    </div>
+                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Akıllı Analiz</h2>
                 </div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Akıllı Analiz</h2>
+                {isUsingFallback && (
+                    <div className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border border-amber-200 dark:border-amber-800">
+                        <Zap size={10} /> Genel Ortalama
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -38,15 +49,35 @@ export const SmartAnalysisCard: React.FC<SmartAnalysisCardProps> = ({
                     <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div className="flex items-center gap-2 mb-2 text-slate-500 dark:text-slate-400">
                             <Calendar size={16} />
-                            <span className="text-xs font-black uppercase tracking-widest">Tahmini Bitiş</span>
+                            <span className="text-xs font-black uppercase tracking-widest">Hızına Göre Tahmin</span>
                         </div>
-                        <p className="text-xl font-black text-slate-900 dark:text-slate-100">
-                            {analysis.predictedFinishDate
-                                ? format(analysis.predictedFinishDate, 'd MMMM yyyy', { locale: tr })
-                                : 'Veri bekleniyor...'}
-                        </p>
+                        <div className="space-y-2">
+                            {analysis.predictedFinishDate ? (
+                                <>
+                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                        {isUsingFallback ? 'Genel okuma hızınızla' : 'Mevcut hızınızla'} kitabı <span className="text-indigo-600 dark:text-indigo-400 font-black">
+                                            {format(analysis.predictedFinishDate, 'd MMMM yyyy', { locale: tr })}
+                                        </span> tarihinde bitireceksiniz.
+                                    </p>
+                                    {analysis.remainingReadingTimeSeconds && (
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                            Kitabı bitirmek için toplam <span className="text-indigo-600 dark:text-indigo-400 font-black">
+                                                {(() => {
+                                                    const totalMinutes = Math.floor(analysis.remainingReadingTimeSeconds / 60);
+                                                    const hours = Math.floor(totalMinutes / 60);
+                                                    const minutes = totalMinutes % 60;
+                                                    return `${hours > 0 ? hours + ' saat ' : ''}${minutes} dakika`;
+                                                })()}
+                                            </span> daha okuma yapmanız gerekiyor.
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="text-sm font-bold text-slate-500 italic">Okuma verisi toplandığında tahminler burada görünecek.</p>
+                            )}
+                        </div>
                         {analysis.daysAheadOrBehind !== null && (
-                            <p className={`text-xs font-bold mt-1 ${analysis.daysAheadOrBehind >= 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                            <p className={`text-[10px] font-black uppercase tracking-wider mt-3 ${analysis.daysAheadOrBehind >= 0 ? 'text-green-600' : 'text-orange-600'}`}>
                                 {analysis.daysAheadOrBehind >= 0
                                     ? `Plana göre ${analysis.daysAheadOrBehind} gün erken`
                                     : `Plana göre ${Math.abs(analysis.daysAheadOrBehind)} gün gecikmeli`}
@@ -105,7 +136,9 @@ export const SmartAnalysisCard: React.FC<SmartAnalysisCardProps> = ({
                         <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
                             {analysis.efficiencyScore > 100
                                 ? "Ortalamanın üzerinde bir odaklanma ile okuyorsun. Bu performansı korumak için seans aralarında mola vermeyi unutma."
-                                : "Bu kitapta biraz daha yavaş ilerliyorsun. Belki de sindirerek okuman gereken bir eserdir, hızlanmak için kendini zorlama."}
+                                : isUsingFallback
+                                    ? "Bu kitap için henüz yeterli veri yok, genel okuma hızınız üzerinden hesaplama yaptık."
+                                    : "Bu kitapta biraz daha yavaş ilerliyorsun. Belki de sindirerek okuman gereken bir eserdir, hızlanmak için kendini zorlama."}
                         </p>
                     </div>
                 </div>
