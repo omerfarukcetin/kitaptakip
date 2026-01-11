@@ -2,22 +2,37 @@ import React, { useState } from 'react';
 import { Layout } from '../components/shared/Layout';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '../hooks/useAuth';
+import { useReadingGoals } from '../hooks/useReadingGoals';
 import { User, Target, LogOut, Save } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
     const { profile, updateProfile } = useProfile();
     const { signOut } = useAuth();
+    const currentYear = new Date().getFullYear();
+    const { goal, saveGoal } = useReadingGoals(currentYear);
     const [yearlyGoal, setYearlyGoal] = useState(profile?.reading_goal_yearly || 12);
     const [fullName, setFullName] = useState(profile?.full_name || '');
     const [isSaving, setIsSaving] = useState(false);
 
+    React.useEffect(() => {
+        if (goal) {
+            setYearlyGoal(goal.goal);
+        }
+    }, [goal]);
+
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await updateProfile.mutateAsync({
-                reading_goal_yearly: yearlyGoal,
-                full_name: fullName,
-            });
+            await Promise.all([
+                updateProfile.mutateAsync({
+                    reading_goal_yearly: yearlyGoal,
+                    full_name: fullName,
+                }),
+                saveGoal.mutateAsync({
+                    year: currentYear,
+                    goal: yearlyGoal
+                })
+            ]);
             alert('Profil güncellendi!');
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -69,7 +84,7 @@ export const ProfilePage: React.FC = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
-                                <Target size={16} className="text-indigo-500" /> Yıllık Okuma Hedefi (2025)
+                                <Target size={16} className="text-indigo-500" /> Yıllık Okuma Hedefi ({currentYear})
                             </label>
                             <div className="flex items-center gap-4">
                                 <input
