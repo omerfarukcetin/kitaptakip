@@ -26,6 +26,7 @@ export const BookForm: React.FC<BookFormProps> = ({
         title: initialData?.title || '',
         author: initialData?.author || '',
         total_pages: initialData?.total_pages || 0,
+        current_page: initialData?.current_page || 0,
         status: initialData?.status || 'to_read',
         cover_url: initialData?.cover_url || '',
         isbn: initialData?.isbn || '',
@@ -34,7 +35,7 @@ export const BookForm: React.FC<BookFormProps> = ({
         description: initialData?.description || '',
         started_at: initialData?.started_at || null,
         completed_at: initialData?.completed_at || null,
-        rating: initialData?.rating || 0,
+        rating: initialData?.rating || null,
         review: (initialData as any)?.review || '',
     });
 
@@ -110,6 +111,18 @@ export const BookForm: React.FC<BookFormProps> = ({
         const cleanData = { ...formData };
         if (cleanData.status !== 'completed') {
             (cleanData as any).review = null;
+            cleanData.completed_at = null;
+        }
+
+        // Fix rating constraint: 0 or null is not allowed by database check (rating >= 1)
+        // If rating is 0 or null, we should remove it from the insert/update object if it's optional
+        if (cleanData.rating === 0 || cleanData.rating === null) {
+            delete cleanData.rating;
+        }
+
+        // Auto-set started_at if status is reading and it's empty
+        if (cleanData.status === 'reading' && !cleanData.started_at) {
+            cleanData.started_at = new Date().toISOString();
         }
 
         await onSubmit(cleanData);
@@ -330,7 +343,7 @@ export const BookForm: React.FC<BookFormProps> = ({
                                     </label>
                                     <StarRating
                                         rating={formData.rating || 0}
-                                        onChange={(rating) => setFormData({ ...formData, rating })}
+                                        onChange={(rating) => setFormData({ ...formData, rating: rating || null })}
                                         size={32}
                                     />
                                 </div>
