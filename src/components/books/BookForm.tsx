@@ -102,27 +102,45 @@ export const BookForm: React.FC<BookFormProps> = ({
             return;
         }
 
-        if (formData.current_page && formData.current_page > formData.total_pages) {
-            alert('Mevcut sayfa, toplam sayfa sayısından büyük olamaz.');
-            return;
-        }
-
-        // Clean up data for update/insert
+        // Data Sanitization: Convert empty strings to null and handle specific fields
         const cleanData = { ...formData };
-        if (cleanData.status !== 'completed') {
-            (cleanData as any).review = null;
+
+        // Fields that should be null if empty string
+        const fieldsToNullify = ['author', 'isbn', 'notes', 'description', 'cover_url'] as const;
+        fieldsToNullify.forEach(field => {
+            if (typeof cleanData[field] === 'string' && (cleanData[field] as string).trim() === '') {
+                (cleanData as any)[field] = null;
+            }
+        });
+
+        // Status specific logic
+        if (cleanData.status === 'to_read') {
+            cleanData.current_page = 0;
+            cleanData.started_at = null;
             cleanData.completed_at = null;
+            (cleanData as any).review = null;
+            cleanData.rating = null;
+        } else if (cleanData.status === 'reading') {
+            if (cleanData.current_page && cleanData.current_page > cleanData.total_pages) {
+                alert('Mevcut sayfa, toplam sayfa sayısından büyük olamaz.');
+                return;
+            }
+            if (!cleanData.started_at) {
+                cleanData.started_at = new Date().toISOString();
+            }
+            cleanData.completed_at = null;
+            (cleanData as any).review = null;
+            cleanData.rating = null;
+        } else if (cleanData.status === 'completed') {
+            cleanData.current_page = cleanData.total_pages;
+            if (!cleanData.completed_at) {
+                cleanData.completed_at = new Date().toISOString();
+            }
         }
 
-        // Fix rating constraint: 0 or null is not allowed by database check (rating >= 1)
-        // If rating is 0 or null, we should remove it from the insert/update object if it's optional
-        if (cleanData.rating === 0 || cleanData.rating === null) {
+        // Fix rating constraint (rating >= 1 and rating <= 5)
+        if (cleanData.status !== 'completed' || !cleanData.rating || cleanData.rating < 1) {
             delete cleanData.rating;
-        }
-
-        // Auto-set started_at if status is reading and it's empty
-        if (cleanData.status === 'reading' && !cleanData.started_at) {
-            cleanData.started_at = new Date().toISOString();
         }
 
         await onSubmit(cleanData);
